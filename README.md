@@ -4,7 +4,7 @@ Reproducibility code for:
 
 > **Wild Bootstrap Inference for Non-Negative Matrix Factorization with Random Effects**
 > Kenichi Satoh (Shiga University)
-> *Psychometrika* Special Issue on Variable Selection for Complex Psychometric Data (2026)
+> (2026)
 
 ## Repository Structure
 
@@ -147,7 +147,7 @@ If you use the NMF-RE method, please cite:
 
 ```
 Satoh, K. (2026). Wild bootstrap inference for non-negative matrix factorization
-with random effects. Psychometrika. [forthcoming]
+with random effects. [manuscript]
 ```
 
 ## Contact
