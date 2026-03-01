@@ -1,0 +1,464 @@
+---
+title: 'NMF-RE Simulation: Baseline (P=4, Q=1)'
+author: 'Kenichi Satoh'
+date: "Last updated: `r format(Sys.time(), '%Y/%m/%d')`"
+output:
+  word_document:
+    fig_width: 12
+    fig_height: 12
+    toc: no
+---
+
+This script reproduces Table 1 (and Appendix Table F1) of
+"Wild Bootstrap Inference for Non-Negative Matrix Factorization
+with Random Effects" (Satoh, 2026).
+
+Baseline simulation: P=4, Q=1, Orthodont-based DGP.
+Two error distributions (Gaussian, Exp-centered) x
+two hypotheses (Null, Alternative) x three sample sizes (N=27, 100, 200).
+R=1000 Monte Carlo replicates per setting.
+
+NOTE: This simulation is computationally intensive.
+With 24 cores, expect ~2-3 hours for the full run.
+
+## Load NMF-RE core functions
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=TRUE, error=TRUE, message=TRUE}
+source("nmfre_core.R")
+
+############################################################
+## NMF-RE Numerical Study (Orthodont, P=4, Q=1)  [ALIGNED+]
+## - Uses the SAME nmf.re() as the data-analysis example
+## - Adds option: err_dist ("gaussian" or "exp_centered")
+############################################################
+
+Sys.setenv(
+  OMP_NUM_THREADS="1",
+  OPENBLAS_NUM_THREADS="1",
+  MKL_NUM_THREADS="1",
+  VECLIB_MAXIMUM_THREADS="1",
+  NUMEXPR_NUM_THREADS="1"
+)
+
+suppressPackageStartupMessages({
+  library(nlme)
+  library(parallel)
+  # install.packages("nmfkc")  # required for nmfkc::nmfkc() initialization
+})
+
+## ==========================
+## Settings
+## ==========================
+N_vec   <- c(27, 100, 200)
+R_mc    <- 1000
+wild_B  <- 1000
+
+## ==========================
+## Full (refit) bootstrap settings
+## Set full_B = 0 to skip (very time-consuming)
+## ==========================
+full_B      <- 0
+full_level  <- 0.95
+full_weight <- "exp_centered"
+full_maxit  <- 50000
+full_eps    <- 1e-8
+seed_base_full <- 20260301
+
+n_cores <- max(1, detectCores() - 1)
+
+seed_base_design <- 20260110
+seed_base_mc     <- 20260201
+
+Q <- 1
+maxit   <- 50000
+epsilon <- 1e-8
+
+dfU_cap_rate <- 0.21
+alpha <- 0.05
+
+sigma2_true <- 1
+tau2_true   <- 1
+
+err_dist_vec <- c("gaussian", "exp_centered")
+u_dist       <- "gaussian"
+
+## True Orthodont-based structure
+X_true <- matrix(c(0.2308, 0.2409, 0.2566, 0.2717), nrow=4, ncol=1)
+stopifnot(abs(sum(X_true) - 1) < 1e-6)
+
+Theta_true_B <- matrix(c(90.502, 9.4285), nrow=1,
+                       dimnames=list("Trend1", c("intercept","male")))
+Theta_true_A <- Theta_true_B
+Theta_true_A[1,"male"] <- 0
+
+## ==========================
+## Design matrix A
+## ==========================
+dat8 <- subset(nlme::Orthodont, age == 8)
+male0 <- as.integer(dat8$Sex == "Male")
+p_male <- mean(male0)
+
+A_orth <- rbind(intercept = rep(1, length(male0)),
+                male      = male0)
+stopifnot(ncol(A_orth) == 27)
+
+make_A_bern <- function(N, p, seed) {
+  set.seed(seed)
+  male <- rbinom(N, 1, p)
+  rbind(intercept = rep(1, N),
+        male      = male)
+}
+
+use_orthodont_design_N27 <- TRUE
+
+get_A <- function(N_target) {
+  if (N_target == 27 && isTRUE(use_orthodont_design_N27)) {
+    return(A_orth)
+  }
+  make_A_bern(N_target, p_male, seed_base_design + N_target)
+}
+
+## ==========================
+## Noise generators
+## ==========================
+gen_noise_vec <- function(n, dist, sd) {
+  dist <- match.arg(dist, c("gaussian", "exp_centered"))
+  if (!is.finite(sd) || sd < 0) stop("sd must be nonnegative.")
+  if (sd == 0) return(rep(0, n))
+
+  if (dist == "gaussian") {
+    return(rnorm(n, mean = 0, sd = sd))
+  } else {
+    return((rexp(n, rate = 1) - 1) * sd)
+  }
+}
+
+gen_noise_mat <- function(nrow, ncol, dist, sd) {
+  matrix(gen_noise_vec(nrow * ncol, dist = dist, sd = sd), nrow = nrow, ncol = ncol)
+}
+
+## ==========================
+## One replicate
+## ==========================
+simulate_one <- function(sim_id, N_target, Theta_true, scenario_label,
+                         err_dist="gaussian", u_dist="gaussian") {
+
+  A_use <- get_A(N_target)
+
+  seed_mc <- seed_base_mc + sim_id + 100000 * N_target
+  set.seed(seed_mc)
+
+  U <- matrix(gen_noise_vec(ncol(A_use), dist=u_dist, sd=sqrt(tau2_true)), 1)
+  E <- gen_noise_mat(nrow(X_true), ncol(A_use), dist=err_dist, sd=sqrt(sigma2_true))
+  B <- Theta_true %*% A_use + U
+  Y <- X_true %*% B + E
+
+  ymin <- suppressWarnings(min(Y))
+  if (is.finite(ymin) && ymin < 0) Y <- Y - ymin + 1e-8
+
+  ini <- tryCatch(
+    nmfkc::nmfkc(
+      Y = Y, A = A_use, Q = Q,
+      method = "EU",
+      epsilon = 1e-8,
+      maxit = 2000,
+      seed = 700000 + sim_id,
+      print.trace = FALSE,
+      print.dims  = FALSE,
+      save.time = FALSE,
+      save.memory = FALSE
+    ),
+    error = function(e) e
+  )
+  if (inherits(ini, "error")) return(NULL)
+  if (is.null(ini$X) || is.null(ini$C)) return(NULL)
+
+  X_ini <- as.matrix(ini$X)
+  Theta_ini <- as.matrix(ini$C)
+
+  s <- colSums(X_ini)
+  s[!is.finite(s) | s <= 0] <- 1
+  X_ini <- sweep(X_ini, 2, s, "/")
+  Theta_ini <- sweep(Theta_ini, 1, s, "*")
+  Theta_ini <- pmax(Theta_ini, 1e-6)
+
+  fit <- tryCatch(
+    nmf.re(
+      Y = Y, A = A_use, Q = Q,
+      X.ini = X_ini,
+      Theta.ini = Theta_ini,
+      prefix = "Trend",
+      verbose = FALSE,
+      dfU_control = "cap",
+      dfU_cap_rate = dfU_cap_rate,
+      maxit = maxit,
+      epsilon = epsilon,
+      inference = TRUE,
+      wild_B = wild_B,
+      wild_weight = "exp_centered",
+      wild_seed = 100000 + sim_id,
+      seed = 500000 + sim_id,
+      post_message = FALSE,
+      save_obj_trace = FALSE,
+      theta_p_side = "one.sided"
+    ),
+    error = function(e) e
+  )
+  if (inherits(fit, "error")) return(NULL)
+
+  coef <- fit$coefficients
+  if (is.null(coef) || nrow(coef) == 0) return(NULL)
+
+  pick <- function(varname) {
+    ii <- which(coef$Variable == varname & coef$Basis == "Trend1")
+    if (length(ii) != 1) return(list(est=NA,se=NA,bse=NA))
+    list(est = coef$Estimate[ii],
+         se  = coef$SE[ii],
+         bse = coef$BSE[ii])
+  }
+
+  mal <- pick("male")
+
+  z_se  <- mal$est / mal$se
+  z_bse <- mal$est / mal$bse
+
+  reject_se  <- if (scenario_label == "A_null") (z_se  > qnorm(1 - alpha)) else (abs(z_se)  > qnorm(1 - alpha/2))
+  reject_bse <- if (scenario_label == "A_null") (z_bse > qnorm(1 - alpha)) else (abs(z_bse) > qnorm(1 - alpha/2))
+
+  ciL_se  <- mal$est - qnorm(1 - alpha/2) * mal$se
+  ciU_se  <- mal$est + qnorm(1 - alpha/2) * mal$se
+  ciL_bse <- mal$est - qnorm(1 - alpha/2) * mal$bse
+  ciU_bse <- mal$est + qnorm(1 - alpha/2) * mal$bse
+
+  theta_true_male <- Theta_true[1,"male"]
+
+  cover_se  <- (theta_true_male >= ciL_se  && theta_true_male <= ciU_se)
+  cover_bse <- (theta_true_male >= ciL_bse && theta_true_male <= ciU_bse)
+
+  pct_cover <- NA
+  if (!is.null(fit$Theta.ci.lower) && !is.null(fit$Theta.ci.upper)) {
+    lo <- fit$Theta.ci.lower[1,"male"]
+    hi <- fit$Theta.ci.upper[1,"male"]
+    pct_cover <- (theta_true_male >= lo && theta_true_male <= hi)
+  }
+
+  ## Full (refit) bootstrap
+  fbse_male <- NA_real_
+  reject_fbse <- NA_integer_
+  cover_fbse  <- NA_integer_
+  pct_cover_full <- NA_integer_
+  full_ok <- NA_integer_
+
+  if (is.finite(full_B) && full_B > 0) {
+    fb <- full_refit_bootstrap(
+      Y = Y, A_use = A_use, fit0 = fit,
+      sim_id = sim_id, N_target = N_target,
+      B = full_B, level = full_level, weight = full_weight,
+      Q = Q, dfU_cap_rate = dfU_cap_rate,
+      maxit_boot = full_maxit, eps_boot = full_eps,
+      seed_base_full = seed_base_full
+    )
+    full_ok <- as.integer(fb$ok)
+    fbse_male <- fb$sd
+
+    if (is.finite(fbse_male) && fbse_male > 0) {
+      z_fbse <- mal$est / fbse_male
+      reject_fbse <- if (scenario_label == "A_null") {
+        as.integer(z_fbse > qnorm(1 - alpha))
+      } else {
+        as.integer(abs(z_fbse) > qnorm(1 - alpha/2))
+      }
+      ciL_fbse <- mal$est - qnorm(1 - alpha/2) * fbse_male
+      ciU_fbse <- mal$est + qnorm(1 - alpha/2) * fbse_male
+      cover_fbse <- as.integer(theta_true_male >= ciL_fbse && theta_true_male <= ciU_fbse)
+    }
+    if (is.finite(fb$lo) && is.finite(fb$hi)) {
+      pct_cover_full <- as.integer(theta_true_male >= fb$lo && theta_true_male <= fb$hi)
+    }
+  }
+
+  seed_mc <- seed_base_mc + sim_id + 100000 * N_target
+
+  data.frame(
+    sim = sim_id, seed_mc = seed_mc,
+    y_sum = sum(Y), y_min = min(Y),
+    N = N_target, scenario = scenario_label,
+    err_dist = err_dist, u_dist = u_dist,
+    est_male = mal$est, se_male = mal$se, bse_male = mal$bse,
+    reject_se  = as.integer(reject_se),
+    reject_bse = as.integer(reject_bse),
+    cover_se   = as.integer(cover_se),
+    cover_bse  = as.integer(cover_bse),
+    pct_cover  = as.integer(pct_cover),
+    dfU_frac   = fit$dfU_frac,
+    fbse_male = fbse_male,
+    reject_fbse = reject_fbse,
+    cover_fbse  = cover_fbse,
+    pct_cover_full = pct_cover_full,
+    full_ok = full_ok,
+    stringsAsFactors = FALSE
+  )
+}
+
+run_one_setting <- function(N_target, Theta_true, scenario_label, err_dist, u_dist) {
+  out <- mclapply(
+    X = seq_len(R_mc),
+    FUN = function(i) simulate_one(i, N_target, Theta_true, scenario_label,
+                                   err_dist = err_dist, u_dist = u_dist),
+    mc.cores = n_cores
+  )
+  ok_flag <- !vapply(out, is.null, logical(1))
+  n_total <- length(out)
+  n_ok <- sum(ok_flag)
+  cat(sprintf("  [OK] %d / %d\n", n_ok, n_total))
+  if (n_ok < 0.9 * n_total) {
+    stop(sprintf("Too many failures: only %d/%d succeeded.", n_ok, n_total))
+  }
+  out <- out[ok_flag]
+  do.call(rbind, out)
+}
+
+summarize_setting <- function(df, Theta_true) {
+  theta_true_male <- Theta_true[1,"male"]
+  est <- df$est_male
+  sd_mc <- sd(est)
+  bias  <- mean(est) - theta_true_male
+  rmse  <- sqrt(mean((est - theta_true_male)^2))
+
+  c(
+    MeanFBSE = mean(df$fbse_male, na.rm = TRUE),
+    RejectFBSE = mean(df$reject_fbse, na.rm = TRUE),
+    CoverFBSE  = mean(df$cover_fbse,  na.rm = TRUE),
+    PctCoverFull = mean(df$pct_cover_full, na.rm = TRUE),
+    FullOK = mean(df$full_ok, na.rm = TRUE),
+    Bias = bias, SD = sd_mc, RMSE = rmse,
+    MeanSE  = mean(df$se_male,  na.rm=TRUE),
+    MeanBSE = mean(df$bse_male, na.rm=TRUE),
+    RejectSE  = mean(df$reject_se,  na.rm=TRUE),
+    RejectBSE = mean(df$reject_bse, na.rm=TRUE),
+    CoverSE   = mean(df$cover_se,   na.rm=TRUE),
+    CoverBSE  = mean(df$cover_bse,  na.rm=TRUE),
+    PctCover  = mean(df$pct_cover,  na.rm=TRUE),
+    dfU       = mean(df$dfU_frac,   na.rm=TRUE)
+  )
+}
+
+```
+
+
+## Full refit bootstrap function
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=TRUE, error=TRUE, message=TRUE}
+make_Y_wild_resid <- function(Y, fitted, weight = c("exp_centered"), shift_nonneg = TRUE) {
+  weight <- match.arg(weight)
+  P <- nrow(Y); N <- ncol(Y)
+  R <- Y - fitted
+
+  if (weight == "exp_centered") {
+    w <- rexp(N, rate = 1) - 1
+  } else {
+    stop("Unsupported weight.")
+  }
+
+  Yb <- fitted + sweep(R, 2, w, `*`)
+
+  if (isTRUE(shift_nonneg)) {
+    ymin <- suppressWarnings(min(Yb))
+    if (is.finite(ymin) && ymin < 0) Yb <- Yb - ymin + 1e-8
+  }
+  Yb
+}
+
+full_refit_bootstrap <- function(
+  Y, A_use, fit0,
+  sim_id, N_target,
+  B = 200, level = 0.95, weight = "exp_centered",
+  Q = 1, dfU_cap_rate = 0.21,
+  maxit_boot = 50000, eps_boot = 1e-8,
+  seed_base_full = 20260301
+) {
+  if (!is.finite(B) || B <= 0) {
+    return(list(theta_boot = numeric(0), ok = 0L, sd = NA_real_, lo = NA_real_, hi = NA_real_))
+  }
+
+  fitted0 <- fit0$XB.blup
+  if (is.null(fitted0)) {
+    fitted0 <- fit0$X %*% ((fit0$Theta %*% A_use) + fit0$U)
+  }
+
+  theta_boot <- rep(NA_real_, B)
+
+  for (b in 1:B) {
+    set.seed(seed_base_full + sim_id + 100000 * N_target + 1000 * b)
+
+    Yb <- make_Y_wild_resid(Y, fitted = fitted0, weight = weight, shift_nonneg = TRUE)
+
+    fb <- tryCatch(
+      nmf.re(
+        Y = Yb, A = A_use, Q = Q,
+        X.ini = fit0$X, Theta.ini = fit0$Theta, U.ini = fit0$U,
+        verbose = FALSE,
+        dfU_control = "cap", dfU_cap_rate = dfU_cap_rate,
+        maxit = maxit_boot, epsilon = eps_boot,
+        inference = FALSE,
+        seed = 500000 + sim_id + 1000 * b,
+        post_message = FALSE, save_obj_trace = FALSE
+      ),
+      error = function(e) NULL
+    )
+    if (is.null(fb) || is.null(fb$Theta)) next
+    th <- tryCatch(as.numeric(fb$Theta[1, "male"]), error = function(e) NA_real_)
+    theta_boot[b] <- th
+  }
+
+  ok <- sum(is.finite(theta_boot))
+  if (ok < max(10, 0.7 * B)) {
+    return(list(theta_boot = theta_boot, ok = ok, sd = NA_real_, lo = NA_real_, hi = NA_real_))
+  }
+
+  alpha <- 1 - level
+  sd_b <- sd(theta_boot, na.rm = TRUE)
+  lo <- as.numeric(quantile(theta_boot, probs = alpha / 2, na.rm = TRUE, names = FALSE))
+  hi <- as.numeric(quantile(theta_boot, probs = 1 - alpha / 2, na.rm = TRUE, names = FALSE))
+
+  list(theta_boot = theta_boot, ok = ok, sd = sd_b, lo = lo, hi = hi)
+}
+```
+
+
+## Run all settings
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=TRUE, error=TRUE, message=TRUE}
+all_rows <- list()
+
+for (err_dist in err_dist_vec) {
+  cat("\n==============================\n")
+  cat("Running err_dist =", err_dist, " (u_dist =", u_dist, ")\n")
+  cat("==============================\n")
+
+  for (N_target in N_vec) {
+
+    ## Null hypothesis (Theta_male = 0)
+    cat("\n--- N =", N_target, "Null ---\n")
+    dfA <- run_one_setting(N_target, Theta_true_A, "A_null", err_dist, u_dist)
+    sumA <- summarize_setting(dfA, Theta_true_A)
+
+    ## Alternative hypothesis (Theta_male = 9.4285)
+    cat("\n--- N =", N_target, "Alternative ---\n")
+    dfB <- run_one_setting(N_target, Theta_true_B, "B_alt", err_dist, u_dist)
+    sumB <- summarize_setting(dfB, Theta_true_B)
+
+    all_rows[[length(all_rows)+1]] <- data.frame(
+      err_dist = err_dist, u_dist = u_dist,
+      N = N_target, Scenario = "A_null", t(sumA))
+    all_rows[[length(all_rows)+1]] <- data.frame(
+      err_dist = err_dist, u_dist = u_dist,
+      N = N_target, Scenario = "B_alt", t(sumB))
+  }
+}
+
+tab <- do.call(rbind, all_rows)
+print(tab)
+
+write.csv(tab, file = "sim_summary_baseline.csv", row.names = FALSE)
+cat("Saved: sim_summary_baseline.csv\n")
+
+```
+

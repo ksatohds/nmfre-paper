@@ -1,0 +1,94 @@
+---
+title: 'Benchmark: MIMIC SEM (Structural Equation Modeling)'
+author: 'Kenichi Satoh'
+date: "Last updated: `r format(Sys.time(), '%Y/%m/%d')`"
+output:
+  word_document:
+    fig_width: 12
+    fig_height: 12
+    toc: no
+---
+
+This script reproduces Table 6 (MIMIC SEM benchmark) in
+"Wild Bootstrap Inference for Non-Negative Matrix Factorization
+with Random Effects" (Satoh, 2026).
+
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=FALSE, error=FALSE, message=TRUE}
+library(lavaan)
+data(HolzingerSwineford1939)
+
+d <- HolzingerSwineford1939
+dim(d)
+index <- complete.cases(d)
+d <- d[index,]
+dim(d)
+
+colnames(d)
+table(d$grade)
+table(d$sex)
+d$age.rev <- -(d$ageyr + d$agemo / 12)
+d$sex.2 <- ifelse(d$sex == 2, 1, 0)
+d$school.GW <- ifelse(d$school == "Grant-White", 1, 0)
+d[, c("id","sex","ageyr","agemo","school","grade")] <- NULL
+colnames(d)
+
+
+library(lavaan)
+
+# lavaan expects data.frame
+d_lav <- as.data.frame(d)
+d_lav[] <- lapply(d_lav, function(x) as.numeric(as.character(x)))
+
+# Indicators and covariates
+yvars <- paste0("x", 1:9)
+xvars <- c("age.rev", "sex.2", "school.GW")
+
+# 3-factor model (standard assignment)
+# visual: x1-x3, textual: x4-x6, speed: x7-x9
+model_lr <- "
+  visual  =~ x1 + x2 + x3
+  textual =~ x4 + x5 + x6
+  speed   =~ x7 + x8 + x9
+
+  # Latent regression (covariates -> latent factors)
+  visual  ~ a1*age.rev + s1*sex.2 + g1*school.GW
+  textual ~ a2*age.rev + s2*sex.2 + g2*school.GW
+  speed   ~ a3*age.rev + s3*sex.2 + g3*school.GW
+"
+
+fit_lr <- sem(
+  model_lr, data = d_lav,
+  meanstructure = TRUE,
+  std.lv = TRUE,      # Factor variance = 1
+  estimator = "MLR"   # Robust SE
+)
+
+summary(fit_lr, standardized = TRUE, fit.measures = TRUE)
+
+# Extract covariate effects
+pe <- parameterEstimates(fit_lr, standardized = FALSE)
+tab_cov <- subset(pe,
+                  op == "~" &
+                    lhs %in% c("visual","textual","speed") &
+                    rhs %in% xvars)
+tab_cov <- tab_cov[, c("lhs","rhs","est","se","z","pvalue")]
+tab_cov
+
+# Wald tests: joint significance by covariate
+lavTestWald(fit_lr, constraints = "
+  s1 == 0
+  s2 == 0
+  s3 == 0
+")
+lavTestWald(fit_lr, constraints = "
+  a1 == 0
+  a2 == 0
+  a3 == 0
+")
+lavTestWald(fit_lr, constraints = "
+  g1 == 0
+  g2 == 0
+  g3 == 0
+")
+
+```

@@ -1,0 +1,642 @@
+---
+title: 'NMF-RE Simulation: Stress Test (P=4, Q=3)'
+author: 'Kenichi Satoh'
+date: "Last updated: `r format(Sys.time(), '%Y/%m/%d')`"
+output:
+  word_document:
+    fig_width: 12
+    fig_height: 12
+    toc: no
+---
+
+This script reproduces Table 2 (and Appendix Table E1) of
+"Wild Bootstrap Inference for Non-Negative Matrix Factorization
+with Random Effects" (Satoh, 2026).
+
+Stress test: P=4, Q=3, tau2=1000, three cap settings (0.21, 0.99, off).
+R=1000 Monte Carlo replicates per setting.
+
+NOTE: This simulation is computationally intensive.
+
+## Load NMF-RE core functions
+
+```{r setup, echo=TRUE, message=FALSE}
+source("nmfre_core.R")
+```
+
+```{r, dpi=300,eval=T,echo=T,warning=T,error=T,message=T}
+
+## ==========================
+## dfU saturation stress test (NEW)
+## ==========================
+stress_tau2_fit <- 1000   # 大きいほど ridge が弱くなり dfU が 1 に近づく
+stress_sigma2_fit <- 1
+stress_fix_var <- FALSE # TRUEなら sigma2/tau2 を固定して因果を綺麗にする
+
+cap_settings <- list(
+  strict = list(label="cap_0.21", dfU_control="cap", dfU_cap_rate=0.21),
+  loose  = list(label="cap_0.99", dfU_control="cap", dfU_cap_rate=0.99),
+  off    = list(label="off",      dfU_control="off", dfU_cap_rate=NA_real_)
+)
+
+############################################################
+## NMF-RE Numerical Study (Orthodont, P=4, Q=1)  [ALIGNED+]
+## - Uses the SAME nmf.re() as the data-analysis example
+## - Adds option: err_dist ("gaussian" or "exp_centered")
+## - (Optional) u_dist  ("gaussian" or "exp_centered")
+############################################################
+
+## ---- (A) load common nmf.re (最新版) ----
+## 解析例で使っている nmf.re をここで読み込む（同一ファイルを解析例/数値実験で共用）
+
+Sys.setenv(
+  OMP_NUM_THREADS="1",
+  OPENBLAS_NUM_THREADS="1",
+  MKL_NUM_THREADS="1",
+  VECLIB_MAXIMUM_THREADS="1",
+  NUMEXPR_NUM_THREADS="1"
+)
+
+suppressPackageStartupMessages({
+  library(nlme)
+  library(parallel)
+  ## nmfkc は attach しない（nmf.re の取り違え防止）
+  ## library(nmfkc)
+})
+
+## ==========================
+## Settings
+## ==========================
+#N_vec   <- c(27,100,200)
+N_vec   <- c(100)
+#R_mc    <-　1000
+R_mc    <- 1000
+wild_B  <- 1000
+n_cores <- max(1, detectCores() - 1)
+
+seed_base_design <- 20260110  # design (male assignment) seed
+seed_base_mc     <- 20260201  # Monte Carlo seed base
+
+Q <- 1
+maxit   <- 50000
+epsilon <- 1e-8
+
+dfU_cap_rate <- 0.21
+alpha <- 0.05
+
+sigma2_true <- 1
+tau2_true   <- 1
+
+## ---- NEW: error distribution options ----
+## err_dist: observation noise E
+## u_dist  : random effects U (optional; keep gaussian unless you want extra robustness)
+err_dist_vec <- c("gaussian", "exp_centered")  # run both; set to "gaussian" only if needed
+u_dist       <- "gaussian"                     # keep as gaussian by default
+
+## True Orthodont-based structure
+#X_true <- matrix(c(0.2308, 0.2409, 0.2566, 0.2717), nrow=4, ncol=1)
+#stopifnot(abs(sum(X_true) - 1) < 1e-6)
+#Theta_true_B <- matrix(c(90.502, 9.4285), nrow=1,
+#                       dimnames=list("Trend1", c("intercept","male")))
+#Theta_true_A <- Theta_true_B
+#Theta_true_A[1,"male"] <- 0
+
+Q <- 3
+
+## True Orthodont-based structure (P=4, Q=3)
+## 各列の和=1（初期化の正規化と整合）
+X_true <- cbind(
+  Trend1 = c(0.45, 0.30, 0.15, 0.10),  # early-heavy
+  Trend2 = c(0.25, 0.25, 0.25, 0.25),  # flat
+  Trend3 = c(0.10, 0.15, 0.30, 0.45)   # late-heavy
+)
+stopifnot(max(abs(colSums(X_true) - 1)) < 1e-8)
+
+## Theta_true: Q x K (K=2: intercept, male)
+## まずは総量が元のスケール(≈90)になるように intercept を分配
+Theta_true_B <- matrix(
+  c(90.502/3,  9.4285,   # Trend1: male effect here
+    90.502/3,  0.0,      # Trend2
+    90.502/3,  0.0),     # Trend3
+  nrow = Q, byrow = TRUE,
+  dimnames = list(paste0("Trend", 1:Q), c("intercept","male"))
+)
+
+Theta_true_A <- Theta_true_B
+Theta_true_A["Trend1","male"] <- 0
+
+
+
+
+## ==========================
+## Design matrix A
+## ==========================
+dat8 <- subset(nlme::Orthodont, age == 8)
+male0 <- as.integer(dat8$Sex == "Male")
+p_male <- mean(male0)
+
+A_orth <- rbind(intercept = rep(1, length(male0)),
+                male      = male0)
+stopifnot(ncol(A_orth) == 27)
+
+make_A_bern <- function(N, p, seed) {
+  set.seed(seed)
+  male <- rbinom(N, 1, p)
+  rbind(intercept = rep(1, N),
+        male      = male)
+}
+
+use_orthodont_design_N27 <- TRUE
+
+get_A <- function(N_target) {
+  if (N_target == 27 && isTRUE(use_orthodont_design_N27)) {
+    return(A_orth)
+  }
+  make_A_bern(N_target, p_male, seed_base_design + N_target)
+}
+
+## ==========================
+## Noise generators (NEW)
+## ==========================
+gen_noise_vec <- function(n, dist, sd) {
+  dist <- match.arg(dist, c("gaussian", "exp_centered"))
+  if (!is.finite(sd) || sd < 0) stop("sd must be nonnegative.")
+  if (sd == 0) return(rep(0, n))
+
+  if (dist == "gaussian") {
+    return(rnorm(n, mean = 0, sd = sd))
+  } else {
+    ## Exp(1)-1: mean 0, var 1, skewed/heavy-tailed relative to Gaussian
+    return((rexp(n, rate = 1) - 1) * sd)
+  }
+}
+
+gen_noise_mat <- function(nrow, ncol, dist, sd) {
+  matrix(gen_noise_vec(nrow * ncol, dist = dist, sd = sd), nrow = nrow, ncol = ncol)
+}
+
+## ==========================
+## One replicate
+## ==========================
+## ==========================
+## One replicate (cap/off + stress options)
+## ==========================
+simulate_one <- function(sim_id, N_target, Theta_true, scenario_label,
+                         err_dist="gaussian", u_dist="gaussian",
+                         cap_set = NULL,
+                         stress_fix_var = FALSE,
+                         stress_sigma2_fit = 1,
+                         stress_tau2_fit   = 1000) {
+
+  # ---- cap settings (backward compatible) ----
+  cap_label <- NA_character_
+  dfU_control_use <- "cap"
+  dfU_cap_rate_use <- dfU_cap_rate
+
+  if (!is.null(cap_set)) {
+    if (!is.null(cap_set$label))       cap_label <- cap_set$label
+    if (!is.null(cap_set$dfU_control)) dfU_control_use <- cap_set$dfU_control
+    if (!is.null(cap_set$dfU_cap_rate)) dfU_cap_rate_use <- cap_set$dfU_cap_rate
+  }
+
+  # 1) まず A を作る（ここで set.seed が走ってもOK）
+  A_use <- get_A(N_target)
+
+  # 2) ここで Monte Carlo 用 seed を改めてセット（重要！）
+  seed_mc <- seed_base_mc + sim_id + 100000 * N_target
+  set.seed(seed_mc)
+
+  # 3) この後に U, E, Y を生成
+  #U <- matrix(gen_noise_vec(ncol(A_use), dist=u_dist, sd=sqrt(tau2_true)), 1)
+  #E <- gen_noise_mat(nrow(X_true), ncol(A_use), dist=err_dist, sd=sqrt(sigma2_true))
+  #B <- Theta_true %*% A_use + U
+  #Y <- X_true %*% B + E
+  
+## U: Q x N に拡張（各成分にランダム効果）
+U <- gen_noise_mat(Q, ncol(A_use), dist = u_dist, sd = sqrt(tau2_true))
+
+E <- gen_noise_mat(nrow(X_true), ncol(A_use), dist = err_dist, sd = sqrt(sigma2_true))
+
+B <- Theta_true %*% A_use + U      # (Q x N)
+Y <- X_true %*% B + E              # (P x N)
+  
+
+  ## safety: enforce nonnegativity (rare here)
+  ymin <- suppressWarnings(min(Y))
+  if (is.finite(ymin) && ymin < 0) Y <- Y - ymin + 1e-8
+
+  ## ---- nmfkc init (no attach) ----
+  ini <- tryCatch(
+    nmfkc::nmfkc(
+      Y = Y, A = A_use, Q = Q,
+      method = "EU",
+      epsilon = 1e-8,
+      maxit = 2000,
+      seed = 700000 + sim_id,
+      print.trace = FALSE,
+      print.dims  = FALSE,
+      save.time = FALSE,
+      save.memory = FALSE
+    ),
+    error = function(e) e
+  )
+  if (inherits(ini, "error")) return(NULL)
+  if (is.null(ini$X) || is.null(ini$C)) return(NULL)
+
+  X_ini <- as.matrix(ini$X)
+  Theta_ini <- as.matrix(ini$C)
+
+  ## normalize init: colSums(X)=1, absorb scale into Theta
+  s <- colSums(X_ini)
+  s[!is.finite(s) | s <= 0] <- 1
+  X_ini <- sweep(X_ini, 2, s, "/")
+  Theta_ini <- sweep(Theta_ini, 1, s, "*")
+  Theta_ini <- pmax(Theta_ini, 1e-6)
+
+  ## ---- fit (YOUR nmf.re) ----
+  call_args <- list(
+    Y = Y, A = A_use, Q = Q,
+    X.ini = X_ini,
+    Theta.ini = Theta_ini,
+    prefix = "Trend",
+    verbose = FALSE,
+    dfU_control = dfU_control_use,
+    # dfU_cap_rate は nmf.re 側で正の数チェックがあるので、off のときもダミーを渡す
+    dfU_cap_rate = if (dfU_control_use == "cap") dfU_cap_rate_use else 0.10,
+    maxit = maxit,
+    epsilon = epsilon,
+    inference = TRUE,
+    wild_B = wild_B,
+    wild_weight = "exp_centered",
+    wild_seed = 100000 + sim_id,
+    seed = 500000 + sim_id,
+    post_message = FALSE,
+    save_obj_trace = FALSE,
+    theta_p_side = "one.sided",
+    ## ★追加：初期値として入れる（固定はしない）
+    sigma2 = stress_sigma2_fit,
+    tau2   = stress_tau2_fit    
+  )
+  
+    ## ---- NEW: only for dfU_control="off", freeze tau2 update ----
+  ## 목적: keep tau2 large (e.g., 1000) so lambda=sigma2/tau2 stays small,
+  ##       making U-saturation more likely when cap is OFF.
+  if (identical(dfU_control_use, "off")) {
+    call_args$tau2_update <- FALSE
+    ## （任意：より早く "壊れ方" を出したい場合は sigma2 更新を早める）
+    # call_args$sigma2_update_start <- 1
+    # call_args$sigma2_update_every <- 1
+    # call_args$sigma2_update_rate  <- 0.2
+  }
+
+  # ---- stress: variance fixed (optional) ----
+  if (isTRUE(stress_fix_var)) {
+    call_args$sigma2_update <- FALSE
+    call_args$tau2_update   <- FALSE
+  }
+
+  fit <- tryCatch(
+    do.call(nmf.re, call_args),
+    error = function(e) e
+  )
+  if (inherits(fit, "error")) return(NULL)
+
+  coef <- fit$coefficients
+  if (is.null(coef) || nrow(coef) == 0) return(NULL)
+
+  pick <- function(varname) {
+    ii <- which(coef$Variable == varname & coef$Basis == "Trend1")
+    if (length(ii) != 1) return(list(est=NA,se=NA,bse=NA))
+    list(est = coef$Estimate[ii],
+         se  = coef$SE[ii],
+         bse = coef$BSE[ii])
+  }
+
+  mal <- pick("male")
+
+  ## Evaluation uses z-thresholds (not p_value), so p-side changes won't move results
+  z_se  <- mal$est / mal$se
+  z_bse <- mal$est / mal$bse
+
+  reject_se  <- if (scenario_label == "A_null") (z_se  > qnorm(1 - alpha)) else (abs(z_se)  > qnorm(1 - alpha/2))
+  reject_bse <- if (scenario_label == "A_null") (z_bse > qnorm(1 - alpha)) else (abs(z_bse) > qnorm(1 - alpha/2))
+
+  ciL_se  <- mal$est - qnorm(1 - alpha/2) * mal$se
+  ciU_se  <- mal$est + qnorm(1 - alpha/2) * mal$se
+  ciL_bse <- mal$est - qnorm(1 - alpha/2) * mal$bse
+  ciU_bse <- mal$est + qnorm(1 - alpha/2) * mal$bse
+
+  theta_true_male <- Theta_true[1,"male"]
+
+  cover_se  <- (theta_true_male >= ciL_se  && theta_true_male <= ciU_se)
+  cover_bse <- (theta_true_male >= ciL_bse && theta_true_male <= ciU_bse)
+
+  pct_cover <- NA
+  if (!is.null(fit$Theta.ci.lower) && !is.null(fit$Theta.ci.upper)) {
+    lo <- fit$Theta.ci.lower[1,"male"]
+    hi <- fit$Theta.ci.upper[1,"male"]
+    pct_cover <- (theta_true_male >= lo && theta_true_male <= hi)
+  }
+
+  data.frame(
+    sim = sim_id,
+    seed_mc = seed_mc,
+    y_sum = sum(Y),
+    y_min = min(Y),
+
+    N = N_target, scenario = scenario_label,
+    err_dist = err_dist, u_dist = u_dist,
+
+    cap = cap_label,
+    dfU_control = dfU_control_use,
+    dfU_cap_rate_used = if (dfU_control_use == "cap") dfU_cap_rate_use else NA_real_,
+
+    est_male = mal$est, se_male = mal$se, bse_male = mal$bse,
+    reject_se  = as.integer(reject_se),
+    reject_bse = as.integer(reject_bse),
+    cover_se   = as.integer(cover_se),
+    cover_bse  = as.integer(cover_bse),
+    pct_cover  = as.integer(pct_cover),
+
+    dfU_frac = fit$dfU_frac,
+    dfU_hit_cap = as.integer(isTRUE(fit$dfU_hit_cap)),
+    lambda = fit$lambda,
+
+    stringsAsFactors = FALSE,
+    sigma2_hat  = if (!is.null(fit$sigma2)) fit$sigma2 else NA_real_,
+    tau2_hat    = if (!is.null(fit$tau2)) fit$tau2 else NA_real_,
+    sigma2_used = if (!is.null(fit$sigma2_used)) fit$sigma2_used else NA_real_
+  )
+}
+
+run_one_setting <- function(N_target, Theta_true, scenario_label, err_dist, u_dist) {
+
+  out <- mclapply(
+    X = seq_len(R_mc),
+    FUN = function(i) simulate_one(i, N_target, Theta_true, scenario_label,
+                                   err_dist = err_dist, u_dist = u_dist),
+    mc.cores = n_cores
+  )
+
+  ok_flag <- !vapply(out, is.null, logical(1))
+  n_total <- length(out)
+  n_ok <- sum(ok_flag)
+  cat(sprintf("  [OK] %d / %d\n", n_ok, n_total))
+
+  ## ここが重要：成功が少なすぎるときは止める
+  if (n_ok < 0.9 * n_total) {
+    stop(sprintf("Too many failures: only %d/%d succeeded.", n_ok, n_total))
+  }
+
+  out <- out[ok_flag]
+  do.call(rbind, out)
+}
+
+summarize_setting <- function(df, Theta_true) {
+  theta_true_male <- Theta_true[1,"male"]
+  est <- df$est_male
+  sd_mc <- sd(est)
+  bias  <- mean(est) - theta_true_male
+  rmse  <- sqrt(mean((est - theta_true_male)^2))
+
+  c(
+    Bias = bias,
+    SD   = sd_mc,
+    RMSE = rmse,
+    MeanSE  = mean(df$se_male,  na.rm=TRUE),
+    MeanBSE = mean(df$bse_male, na.rm=TRUE),
+    RejectSE  = mean(df$reject_se,  na.rm=TRUE),
+    RejectBSE = mean(df$reject_bse, na.rm=TRUE),
+    CoverSE   = mean(df$cover_se,   na.rm=TRUE),
+    CoverBSE  = mean(df$cover_bse,  na.rm=TRUE),
+    PctCover  = mean(df$pct_cover,  na.rm=TRUE),
+    dfU       = mean(df$dfU_frac,   na.rm=TRUE)
+  )
+}
+
+
+
+run_one_setting_cap <- function(N_target, Theta_true, scenario_label, err_dist, u_dist, cap_set,
+                                stress_fix_var = FALSE,
+                                stress_sigma2_fit = 1,
+                                stress_tau2_fit = 1000) {
+
+  out <- mclapply(
+    X = seq_len(R_mc),
+    FUN = function(i) simulate_one(
+      i, N_target, Theta_true, scenario_label,
+      err_dist = err_dist, u_dist = u_dist,
+      cap_set = cap_set,
+      stress_fix_var = stress_fix_var,
+      stress_sigma2_fit = stress_sigma2_fit,
+      stress_tau2_fit = stress_tau2_fit
+    ),
+    mc.cores = n_cores
+  )
+
+  ok_flag <- !vapply(out, is.null, logical(1))
+  if (sum(ok_flag) < 0.9 * length(out)) stop("Too many failures.")
+  do.call(rbind, out[ok_flag])
+}
+
+
+
+
+
+summarize_setting <- function(df, Theta_true) {
+
+  # ---- helpers (robust to missing columns / all-NA) ----
+  mean_safe <- function(x) {
+    if (is.null(x)) return(NA_real_)
+    x <- as.numeric(x)
+    if (all(!is.finite(x))) return(NA_real_)
+    mean(x, na.rm = TRUE)
+  }
+  sd_safe <- function(x) {
+    if (is.null(x)) return(NA_real_)
+    x <- as.numeric(x)
+    if (sum(is.finite(x)) < 2) return(NA_real_)
+    stats::sd(x, na.rm = TRUE)
+  }
+  quantile_safe <- function(x, p) {
+    if (is.null(x)) return(NA_real_)
+    x <- as.numeric(x)
+    x <- x[is.finite(x)]
+    if (length(x) == 0) return(NA_real_)
+    unname(stats::quantile(x, probs = p, na.rm = TRUE, names = FALSE))
+  }
+
+  theta_true_male <- as.numeric(Theta_true[1, "male"])
+
+  est <- if ("est_male" %in% names(df)) as.numeric(df$est_male) else rep(NA_real_, nrow(df))
+  est_ok <- est[is.finite(est)]
+
+  est_mean <- if (length(est_ok)) mean(est_ok) else NA_real_
+  bias  <- est_mean - theta_true_male
+  rmse  <- if (length(est_ok)) sqrt(mean((est_ok - theta_true_male)^2)) else NA_real_
+  sd_mc <- sd_safe(est)
+
+  c(
+    # ---- estimation accuracy ----
+    Bias = bias,
+    SD   = sd_mc,
+    RMSE = rmse,
+
+    # ---- uncertainty quantification ----
+    MeanSE  = if ("se_male"  %in% names(df)) mean_safe(df$se_male)  else NA_real_,
+    MeanBSE = if ("bse_male" %in% names(df)) mean_safe(df$bse_male) else NA_real_,
+
+    # ---- testing / coverage ----
+    RejectSE  = if ("reject_se"  %in% names(df)) mean_safe(df$reject_se)  else NA_real_,
+    RejectBSE = if ("reject_bse" %in% names(df)) mean_safe(df$reject_bse) else NA_real_,
+    CoverSE   = if ("cover_se"   %in% names(df)) mean_safe(df$cover_se)   else NA_real_,
+    CoverBSE  = if ("cover_bse"  %in% names(df)) mean_safe(df$cover_bse)  else NA_real_,
+    PctCover  = if ("pct_cover"  %in% names(df)) mean_safe(df$pct_cover)  else NA_real_,
+
+    # ---- dfU / saturation diagnostics ----
+    dfU      = if ("dfU_frac" %in% names(df)) mean_safe(df$dfU_frac) else NA_real_,
+    dfU_q90  = if ("dfU_frac" %in% names(df)) quantile_safe(df$dfU_frac, 0.90) else NA_real_,
+    dfU_q99  = if ("dfU_frac" %in% names(df)) quantile_safe(df$dfU_frac, 0.99) else NA_real_,
+    MeanLambda = if ("lambda" %in% names(df)) mean_safe(df$lambda) else NA_real_,
+    CapHitRate = if ("dfU_hit_cap" %in% names(df)) mean_safe(df$dfU_hit_cap) else NA_real_,
+
+    # ---- variance pathway (for stress_fix_var = FALSE runs) ----
+    MeanSigma2Hat  = if ("sigma2_hat"  %in% names(df)) mean_safe(df$sigma2_hat)  else NA_real_,
+    MeanTau2Hat    = if ("tau2_hat"    %in% names(df)) mean_safe(df$tau2_hat)    else NA_real_,
+    MeanSigma2Used = if ("sigma2_used" %in% names(df)) mean_safe(df$sigma2_used) else NA_real_
+  )
+}
+
+
+
+
+summarize_setting_by_cap <- function(df, Theta_true) {
+  L <- split(df, df$cap)
+
+  out <- lapply(names(L), function(nm) {
+    d <- L[[nm]]
+    s <- summarize_setting(d, Theta_true)
+
+    extra <- c(
+      dfU_q90    = unname(stats::quantile(d$dfU_frac, 0.90, na.rm = TRUE)),
+      dfU_q99    = unname(stats::quantile(d$dfU_frac, 0.99, na.rm = TRUE)),
+      MeanLambda = mean(d$lambda, na.rm = TRUE),
+      CapHitRate = mean(d$dfU_hit_cap, na.rm = TRUE)
+    )
+
+    data.frame(
+      cap = nm,
+      as.list(c(s, extra)),
+      check.names = FALSE,
+      stringsAsFactors = FALSE
+    )
+  })
+
+  out <- do.call(rbind, out)
+  rownames(out) <- NULL
+  out
+}
+
+
+
+```
+
+
+
+
+
+
+
+
+```{r, dpi=300,eval=T,echo=T,warning=T,error=T,message=T}
+## ==========================
+## Run all settings
+## ==========================
+all_rows <- list()
+
+## ---- debug settings ----
+debug_N <- c(100, 200)      # チェックを出すN
+debug_show_head <- TRUE     # head(est_male)を出すか
+digits_est <- 8             # est_maleのunique判定の丸め桁
+digits_y   <- 6             # y_sum/y_minのunique判定の丸め桁（列がある場合）
+
+## ---- helper: debug print (dfA/dfBどちらにも使う) ----
+debug_check <- function(df, tag,
+                        show_head = TRUE,
+                        digits_est = 8,
+                        digits_y = 6) {
+
+  cat(sprintf("  [CHECK %s] nrow = %d\n", tag, nrow(df)))
+
+  ## これらの列がある場合のみ出す（無い場合でも落ちない）
+  if ("sim" %in% names(df)) {
+    cat("  unique sim     =", length(unique(df$sim)), "\n")
+  }
+  if ("seed_mc" %in% names(df)) {
+    cat("  unique seed_mc =", length(unique(df$seed_mc)), "\n")
+  }
+  if ("y_sum" %in% names(df)) {
+    cat("  unique y_sum   =", length(unique(round(as.numeric(df$y_sum), digits_y))), "\n")
+  }
+  if ("y_min" %in% names(df)) {
+    cat("  unique y_min   =", length(unique(round(as.numeric(df$y_min), digits_y))), "\n")
+  }
+
+  ## est_male
+  if ("est_male" %in% names(df)) {
+    est_num <- as.numeric(df$est_male)
+    cat("  unique est_male (round) =",
+        length(unique(round(est_num, digits_est))), "\n")
+    if (isTRUE(show_head)) {
+      print(head(df$est_male, 10))
+    }
+    print(summary(est_num))
+  }
+}
+
+
+
+
+
+all_rows <- list()
+
+for (err_dist in err_dist_vec) {
+  for (N_target in N_vec) {
+    for (cap_nm in names(cap_settings)) {
+
+      cap_set <- cap_settings[[cap_nm]]
+
+      dfA <- run_one_setting_cap(N_target, Theta_true_A, "A_null", err_dist, u_dist, cap_set,
+                                 stress_fix_var = stress_fix_var,
+                                 stress_sigma2_fit = stress_sigma2_fit,
+                                 stress_tau2_fit   = stress_tau2_fit)
+
+      dfB <- run_one_setting_cap(N_target, Theta_true_B, "B_alt", err_dist, u_dist, cap_set,
+                                 stress_fix_var = stress_fix_var,
+                                 stress_sigma2_fit = stress_sigma2_fit,
+                                 stress_tau2_fit   = stress_tau2_fit)
+
+sumA <- summarize_setting(dfA, Theta_true_A)
+sumB <- summarize_setting(dfB, Theta_true_B)
+
+all_rows[[length(all_rows)+1]] <- data.frame(err_dist=err_dist, u_dist=u_dist, N=N_target,
+                                             Scenario="A_null", cap=cap_set$label,
+                                             t(sumA), check.names=FALSE)
+all_rows[[length(all_rows)+1]] <- data.frame(err_dist=err_dist, u_dist=u_dist, N=N_target,
+                                             Scenario="B_alt",  cap=cap_set$label,
+                                             t(sumB), check.names=FALSE)
+    }
+  }
+}
+tab <- do.call(rbind, all_rows)
+
+print(tab[, c("err_dist","N","Scenario","cap",
+              "Bias","SD","RMSE",
+              "dfU","dfU_q99","MeanLambda","CapHitRate",
+              "MeanSigma2Hat","MeanTau2Hat","MeanSigma2Used",
+              "MeanBSE","RejectBSE","CoverBSE")])
+
+write.csv(tab, "sim_summary_dfUcap_stress.csv", row.names = FALSE)
+
+```
+

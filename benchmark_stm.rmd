@@ -1,0 +1,187 @@
+---
+title: 'Benchmark: Structural Topic Model (STM)'
+author: 'Kenichi Satoh'
+date: "Last updated: `r format(Sys.time(), '%Y/%m/%d')`"
+output:
+  word_document:
+    fig_width: 12
+    fig_height: 12
+    toc: no
+---
+
+This script reproduces Table 9 (STM benchmark) in
+"Wild Bootstrap Inference for Non-Negative Matrix Factorization
+with Random Effects" (Satoh, 2026).
+
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=FALSE, error=FALSE, message=TRUE}
+library(quanteda)
+library(stm)
+
+# ----------------------------
+# Settings
+# ----------------------------
+K <- 3
+min_termfreq <- 100
+seed <- 123
+max_em_its <- 200
+nsims_effect <- 200
+thr_repword <- 0.5
+topn_repword <- 30
+
+use_intercept <- TRUE
+
+# Topic permutation (to match NMF-RE ordering)
+topic_perm <- c(2, 1, 3)
+
+make_era <- function(year) {
+  ifelse(year <= 1865, "Early",
+         ifelse(year <= 1945, "Industrial", "Postwar"))
+}
+
+# ----------------------------
+# 1) Corpus -> DFM
+# ----------------------------
+# Load cached corpus for reproducibility (run save_inaugural.R first)
+if (file.exists("data/inaugural_corpus.RData")) {
+  load("data/inaugural_corpus.RData")
+  corp <- corpus(inaugural_texts, docvars = inaugural_docvars)
+  cat("Loaded cached inaugural corpus (", length(inaugural_texts), " documents)\n")
+} else {
+  cat("WARNING: Using quanteda::data_corpus_inaugural directly.\n")
+  cat("  For exact reproducibility, run: source('save_inaugural.R')\n")
+  corp <- corpus(data_corpus_inaugural)
+}
+
+tok <- tokens(corp)
+tok <- tokens_remove(tok, pattern = stopwords("en", source = "snowball"))
+df  <- dfm(tok)
+df  <- dfm_select(df, min_nchar = 3)
+df  <- dfm_trim(df, min_termfreq = min_termfreq)
+df  <- df[rowSums(df) > 0, ]
+
+# ----------------------------
+# 2) Metadata (Year -> era)
+# ----------------------------
+meta <- docvars(df)
+meta$era <- make_era(meta$Year)
+meta$era <- factor(meta$era, levels = c("Early", "Industrial", "Postwar"))
+if (use_intercept) {
+  meta$era <- relevel(meta$era, ref = "Early")
+}
+docvars(df, "era") <- meta$era
+
+# ----------------------------
+# 3) Convert to STM input and fit
+# ----------------------------
+stm_in <- convert(df, to = "stm")
+stm_in$meta$era  <- meta$era
+stm_in$meta$Year <- meta$Year
+
+set.seed(seed)
+
+use_intercept <- FALSE
+
+prev_formula <- ~ 0 + era
+
+fit <- stm(documents = stm_in$documents,
+           vocab     = stm_in$vocab,
+           K         = K,
+           prevalence = prev_formula,
+           data      = stm_in$meta,
+           init.type = "Spectral",
+           max.em.its = max_em_its,
+           verbose   = TRUE)
+
+prep <- estimateEffect(1:K ~ 0 + era, stmobj = fit, metadata = stm_in$meta,
+                       uncertainty = "Global", nsims = nsims_effect)
+summary(prep)
+
+
+# ----------------------------
+# 4) Effect estimation (era)
+# ----------------------------
+eff_formula <- if (use_intercept) {
+  as.formula(paste0("1:", K, " ~ era"))
+} else {
+  as.formula(paste0("1:", K, " ~ 0 + era"))
+}
+
+prep <- estimateEffect(1:K ~ era, stmobj = fit, metadata = stm_in$meta,
+                       uncertainty = "Global", nsims = nsims_effect)
+
+prep <- if (use_intercept) {
+  estimateEffect(1:K ~ era, stmobj = fit, metadata = stm_in$meta,
+                 uncertainty = "Global", nsims = nsims_effect)
+} else {
+  estimateEffect(1:K ~ 0 + era, stmobj = fit, metadata = stm_in$meta,
+                 uncertainty = "Global", nsims = nsims_effect)
+}
+
+print(summary(prep))
+
+# ============================================================
+# 5) Topic representative words
+# ============================================================
+
+# (A) STM standard: labelTopics
+cat("\n\n===== (A) STM labelTopics (top words) =====\n")
+lt <- labelTopics(fit, n = 15)
+for (j in 1:K) {
+  k <- topic_perm[j]
+  cat(sprintf("\n[Display Topic %d  (STM Topic %d)]\n", j, k))
+  cat("  Highest Prob: ", paste(lt$prob[k, ], collapse = ", "), "\n", sep="")
+  cat("  FREX        : ", paste(lt$frex[k, ], collapse = ", "), "\n", sep="")
+  cat("  Lift        : ", paste(lt$lift[k, ], collapse = ", "), "\n", sep="")
+  cat("  Score       : ", paste(lt$score[k, ], collapse = ", "), "\n", sep="")
+}
+
+# (B) Pr(topic|word)
+cat("\n\n===== (B) Representative words via Pr(topic|word) =====\n")
+
+get_p_topic_given_word <- function(fit) {
+  K <- fit$settings$dim$K
+  beta <- exp(fit$beta$logbeta[[1]])
+  beta <- as.matrix(beta)
+  if (nrow(beta) != K && ncol(beta) == K) beta <- t(beta)
+  stopifnot(nrow(beta) == K)
+  colnames(beta) <- fit$vocab
+  p_t_given_w <- sweep(beta, 2, colSums(beta), "/")
+  p_t_given_w
+}
+
+p_t_given_w <- get_p_topic_given_word(fit)
+
+get_rep_words <- function(p_t_given_w, topic_id, thr = 0.5, topn = 30) {
+  v <- p_t_given_w[topic_id, ]
+  idx <- which(v > thr)
+  if (length(idx) == 0) return(character(0))
+  idx <- idx[order(v[idx], decreasing = TRUE)]
+  words <- colnames(p_t_given_w)[idx]
+  if (length(words) > topn) words <- words[1:topn]
+  words
+}
+
+for (j in 1:K) {
+  k <- topic_perm[j]
+  rw <- get_rep_words(p_t_given_w, topic_id = k, thr = thr_repword, topn = topn_repword)
+  cat(sprintf("\n[Display Topic %d  (STM Topic %d)]  thr=%.2f\n", j, k, thr_repword))
+  if (length(rw) == 0) {
+    cat("  (no words exceed threshold)\n")
+  } else {
+    cat("  ", paste(rw, collapse = ", "), "\n", sep="")
+  }
+}
+
+# Top words by Pr(topic|word) (always top-N)
+cat("\n\n===== (B2) Top words by Pr(topic|word) (always top-N) =====\n")
+topn_always <- 20
+for (j in 1:K) {
+  k <- topic_perm[j]
+  v <- p_t_given_w[k, ]
+  idx <- order(v, decreasing = TRUE)[1:topn_always]
+  words <- colnames(p_t_given_w)[idx]
+  cat(sprintf("\n[Display Topic %d  (STM Topic %d)] top-%d\n", j, k, topn_always))
+  cat("  ", paste(words, collapse = ", "), "\n", sep="")
+}
+
+```

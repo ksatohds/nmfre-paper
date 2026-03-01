@@ -1,0 +1,19 @@
+# R outputs
+*.html
+*.docx
+*.pdf
+*.png
+*.csv
+
+# R temporary files
+.Rhistory
+.RData
+.Rproj.user/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keep data directory but ignore generated corpus cache
+# (users regenerate via save_inaugural.R)
+# data/inaugural_corpus.RData

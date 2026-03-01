@@ -1,0 +1,55 @@
+---
+title: 'Benchmark: Projection Pursuit Regression (PPR)'
+author: 'Kenichi Satoh'
+date: "Last updated: `r format(Sys.time(), '%Y/%m/%d')`"
+output:
+  word_document:
+    fig_width: 12
+    fig_height: 12
+    toc: no
+---
+
+This script reproduces the PPR benchmark results in Section 4.3
+of "Wild Bootstrap Inference for Non-Negative Matrix Factorization
+with Random Effects" (Satoh, 2026).
+
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=FALSE, error=FALSE, message=TRUE}
+
+# Load OD flow data (pre-saved to avoid e-stat download issues)
+load("data/od_data.RData")
+cat("Loaded OD data: Y =", dim(Y_od), ", A =", dim(A_od), "\n")
+
+Y <- Y_od; A <- A_od
+hub.index <- c(13, 23, 27, 40)
+
+## --- PPR (Projection Pursuit Regression) ---
+## Observations = destinations (47), predictors = hubs (4), responses = non-hubs (43)
+
+X <- t(A)  # 47 x 4
+Yresp <- t(Y)  # 47 x 43
+
+colnames(X) <- c("Tokyo","Aichi","Osaka","Fukuoka")
+
+set.seed(1)
+fit_ppr <- ppr(x = X, y = Yresp,
+               nterms = 4,
+               max.terms = 10,
+               sm.method = "supsmu")
+
+summary(fit_ppr)
+
+## Predictions (in-sample)
+Yhat <- predict(fit_ppr, newdata = X)  # 47 x 43
+
+## Multivariate R-squared
+rss <- sum((Yresp - Yhat)^2)
+tss <- sum((Yresp - matrix(colMeans(Yresp),
+                           nrow(Yresp), ncol(Yresp), byrow=TRUE))^2)
+R2_all <- 1 - rss/tss
+R2_all
+
+## Ridge function plots
+par(mfrow=c(2,2))
+plot(fit_ppr)
+
+```

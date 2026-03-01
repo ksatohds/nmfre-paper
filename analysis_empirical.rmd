@@ -1,0 +1,300 @@
+---
+title: 'NMF-RE: Empirical Illustrations'
+author: 'Kenichi Satoh'
+date: "Last updated: `r format(Sys.time(), '%Y/%m/%d')`"
+output:
+  word_document:
+    fig_width: 12
+    fig_height: 12
+    toc: no
+---
+
+This script reproduces Tables 4, 5, 7, 8 and Figures 1--4
+of "Wild Bootstrap Inference for Non-Negative Matrix Factorization
+with Random Effects" (Satoh, 2026).
+
+## Setup
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=FALSE, error=FALSE, message=TRUE}
+# ---- Core NMF-RE algorithm ----
+source("nmfre_core.R")
+
+# ---- Package dependencies ----
+# install.packages("nmfkc")  # CRAN v0.6.0 (used for nmfkc.normalize, nmfkc.DOT)
+library(nmfkc)
+```
+
+
+
+
+# Example 1: Orthodont (Tables 4--5, Figure 1)
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=FALSE, error=FALSE, message=TRUE}
+library(nlme)
+print(Sys.time())
+rd <- utils:::.getHelpFile(help("Orthodont"))
+cat(tools::Rd2txt(rd))
+
+d <- Orthodont
+subjects <- unique(d$Subject)
+ages <- sort(unique(d$age))
+N <- length(subjects)
+P <- length(ages)
+
+Y <- matrix(d$distance, nrow = P, ncol = N,
+            dimnames = list(paste0("age", ages), subjects))
+M <- matrix(ifelse(d$Sex=="Male",1,0), nrow = P, ncol = N,
+            dimnames = list(paste0("age", ages), subjects))
+male <- as.vector(M[1,])
+
+A <- rbind(
+  intercept = rep(1, N),
+  male      = male
+)
+
+Q0 <- 1
+
+scan <- scan_dfU_cap_rate(1:10/10, Y, A, Q0)
+scan$cap.rate
+
+res <- nmf.re(Y, A, Q = Q0, dfU_cap_rate = 0.21, prefix = "Trend")
+summary(res)
+
+
+boxplot(cbind(t(res$B),t(res$B.blup)),col=1:Q0+1)
+
+print(round(res$X,4))
+colSums(res$X)
+matplot(res$X,type="l",col=1:Q0+1)
+legend("topleft",legend=1:Q0,fill=1:Q0+1)
+
+
+pdf("Figure1.pdf", height = 7, width = 10)
+par(mar = c(4,4,1,1) + 0.1, cex = 1.2)
+age <- c(8, 10, 12, 14)
+plot(age, res$XB[,1], type = "n", ylim = range(Y),xlab = "Age", ylab = "Distance")
+for (j in 1:27) {
+  pch_j <- ifelse(male[j] == 1, 4, 1)
+  points(age, Y[,j], pch = pch_j, col = "black", cex = 0.8)
+  lines(age, res$XB.blup[,j], col = "black", lty = 3, lwd = 1.5)
+  lines(age, res$XB[,j], col = "black", lwd = 3)
+}
+legend("topleft",legend = c("Fixed effect","Fixed effect + Random effect (BLUP)",
+                  "Male", "Female"),
+       lwd = c(3, 1.5, NA, NA),lty = c(1, 3, NA, NA),pch = c(NA, NA, 4, 1),
+       col = "black",pt.cex = 1,bg = "white",cex = 0.9)
+dev.off()
+
+```
+
+
+
+
+# Example 2: HolzingerSwineford1939 (Tables 7--8, Figure 2)
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=FALSE, error=FALSE, message=TRUE}
+library(lavaan)
+data(HolzingerSwineford1939)
+print(Sys.time())
+rd <- utils:::.getHelpFile(help("HolzingerSwineford1939"))
+cat(tools::Rd2txt(rd))
+
+
+d <- HolzingerSwineford1939
+dim(d)
+index <- complete.cases(d)
+d <- d[index,]
+dim(d)
+
+colnames(d)
+table(d$grade)
+table(d$sex)
+d$age.rev <- -(d$ageyr+d$agemo/12)
+d$sex.2 <- ifelse(d$sex==2,1,0)
+d$school.GW <- ifelse(d$school=="Grant-White",1,0)
+d[,c("id","sex","ageyr","agemo","school","grade")] <- NULL
+
+d <- nmfkc::nmfkc.normalize(d)
+
+exogenous_vars <- c("age.rev", "sex.2","school.GW")
+endogenous_vars <- setdiff(colnames(d), exogenous_vars)
+Y <- t(d[, endogenous_vars])
+A <- t(d[, exogenous_vars])
+
+Q0 <- 3
+
+scan <- scan_dfU_cap_rate(8:10/10, Y, A, Q0)
+scan$cap.rate
+
+res <- nmf.re(Y, A, Q = Q0, dfU_cap_rate = 0.96, prefix = "Factor")
+summary(res)
+
+
+boxplot(cbind(t(res$B),t(res$B.blup)),col=1:Q0+1)
+
+
+library(rsvg)
+library(DiagrammeRsvg)
+pngfile <-  paste0("NMF-RE-HS1939.png")
+pdffile <- paste0("Figure2.pdf")
+res.dot <- nmfkc.DOT(res,threshold = 0.05,type="YXA",rankdir="TB",fill=FALSE,
+                     Y.title = "Observation(Y)",X.title = "Factor(X)",
+                     A.title = "Covariate(A)")
+svg_txt <- DiagrammeRsvg::export_svg(DiagrammeR::grViz(res.dot))
+rsvg::rsvg_png(charToRaw(svg_txt),file = pngfile ,width =1000,height = 1000)
+rsvg::rsvg_pdf(charToRaw(svg_txt), file = pdffile)
+knitr::include_graphics(pngfile)
+```
+
+
+
+
+# Example 3: OD Data Hub Model (Figure 3)
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=FALSE, error=FALSE, message=TRUE}
+# https://www.e-stat.go.jp/stat-search/files?page=1&stat_infid=000040170612
+library(httr)
+url <- "https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040170612&fileKind=0"
+GET(url, write_disk(tmp <- tempfile(fileext=".xlsx")))
+library(readxl)
+d <- as.data.frame(read_xlsx(tmp, sheet=1, skip=2))
+# Filter for specific flow type
+d <- d[d[,1]=="1" & d[,3]=="02" & d[,5]!="100" & d[,7]!="100", ]
+pref <- unique(d[,6])
+
+# Create OD Matrix Y (47x47)
+U <- matrix(NA, nrow=47, ncol=47)
+colnames(U) <- rownames(U) <- pref
+d[,5] <- as.numeric(d[,5]); d[,7] <- as.numeric(d[,7])
+for(i in 1:47) for(j in 1:47) U[i,j] <- d[which(d[,5]==i & d[,7]==j), 9]
+U <- log(1 + U) # Log transformation
+
+dim(U)
+colnames(U)
+pref_en <- c(
+  "Hokkaido", "Aomori", "Iwate", "Miyagi", "Akita", "Yamagata", "Fukushima",
+  "Ibaraki", "Tochigi", "Gunma", "Saitama", "Chiba", "Tokyo", "Kanagawa",
+  "Niigata", "Toyama", "Ishikawa", "Fukui", "Yamanashi", "Nagano", "Gifu",
+  "Shizuoka", "Aichi", "Mie", "Shiga", "Kyoto", "Osaka", "Hyogo", "Nara",
+  "Wakayama", "Tottori", "Shimane", "Okayama", "Hiroshima", "Yamaguchi",
+  "Tokushima", "Kagawa", "Ehime", "Kochi", "Fukuoka", "Saga", "Nagasaki",
+  "Kumamoto", "Oita", "Miyazaki", "Kagoshima", "Okinawa"
+)
+colnames(U) <- pref_en
+rownames(U) <- pref_en
+hub.index <- c(13, 23, 27, 40)
+colnames(U)[hub.index]
+
+Y <- U[-hub.index,];dim(Y)
+A <- U[hub.index,];dim(A)
+Q0 <- nrow(A)
+
+scan <- scan_dfU_cap_rate(1:10/100, Y, A, Q0)
+scan$cap.rate
+
+res <- nmf.re(Y, A, Q = Q0, dfU_cap_rate = 0.02, prefix = "Region")
+summary(res)
+
+
+boxplot(cbind(t(res$B),t(res$B.blup)),col=1:Q0+1)
+
+B.cluster <- apply(res$B.prob,2,which.max)
+
+
+pdf("Figure3.pdf", height = 7, width = 10)
+par(mar = c(1,1,1,1) + 0.1, cex = 1.2)
+library(NipponMap)
+st <- paste(hub.index,collapse ="-")
+
+mycol <- c("white","gray70","gray90","gray80")
+jp <- JapanPrefMap(col=mycol[B.cluster],
+                   main =NULL,border="gray60")
+rownames(jp) <- colnames(U)
+ad <- matrix(c(0,-2,0,+3,0,-2,0,3),ncol=2,byrow=T)
+jpad <- jp[hub.index,]+ad
+points(jpad-ad,cex=0.8,pch=19)
+for(i in 1:Q0){
+  lines(rbind(jpad[i,],jpad[i,]-ad[i,]))
+}
+text(x=jpad[,1],y=jpad[,2],rownames(jpad),cex=1.2,pos=4)
+legend(x=144,y=35, legend=colnames(res$X),
+       fill=mycol)
+dev.off()
+
+
+
+```
+
+
+
+
+# Example 4: Topic Model (Figure 4)
+```{r, dpi=300, eval=TRUE, echo=TRUE, warning=FALSE, error=FALSE, message=TRUE}
+library(quanteda)
+print(Sys.time())
+
+# Load cached corpus for reproducibility (run save_inaugural.R first)
+if (file.exists("data/inaugural_corpus.RData")) {
+  load("data/inaugural_corpus.RData")
+  corp <- corpus(inaugural_texts, docvars = inaugural_docvars)
+  cat("Loaded cached inaugural corpus (", length(inaugural_texts), " documents)\n")
+} else {
+  cat("WARNING: Using quanteda::data_corpus_inaugural directly.\n")
+  cat("  For exact reproducibility, run: source('save_inaugural.R')\n")
+  corp <- corpus(data_corpus_inaugural)
+}
+tok <- tokens(corp)
+tok <- tokens_remove(tok, pattern=stopwords("en", source="snowball"))
+df <- dfm(tok)
+df <- dfm_select(df, min_nchar=3)
+df <- dfm_trim(df, min_termfreq=100)
+d <- as.matrix(df)
+# Sort by frequency
+index <- order(colSums(d), decreasing=TRUE)
+d <- d[,index]
+
+Y <- t(d)
+dim(Y)
+
+# Era classification:
+# Early period: Independence to Civil War (1775-1865)
+# Industrial period: Post-Civil War to WWII (1865-1945)
+# Postwar period: Post-WWII to present (1945-)
+A <- rbind(
+  pre1865   = ifelse(corp$Year <= 1865, 1, 0),
+  y1865_45  = ifelse(corp$Year > 1865 & corp$Year <= 1945, 1, 0),
+  after1945 = ifelse(corp$Year > 1945, 1, 0)
+)
+colnames(A) <- colnames(Y)
+dim(Y)
+
+Q0 <- 3
+
+scan <- scan_dfU_cap_rate(1:10/100, Y, A, Q0)
+scan$cap.rate
+
+res <- nmf.re(Y, A, Q = Q0, dfU_cap_rate = 0.02, prefix = "Topic")
+summary(res)
+
+
+print(round(res$C,4))
+print(round(res$X,4))
+boxplot(cbind(t(res$B),t(res$B.blup)),col=1:Q0+1)
+
+
+pdf("Figure4.pdf", height = 7, width = 10)
+par(mar = c(8,4,1,1) + 0.1, cex = 1.0)
+mycol <- c("white","gray80","gray90")
+barplot(res$B.prob,col=mycol,legend=F,las=3,border="gray70",cex.names=0.8,
+        ylab="Topic proportion")
+legend(x=60,y=0.3,legend=colnames(res$X),bg="white",fill=mycol)
+dev.off()
+
+
+# Topic membership probabilities
+Xp <- res$X / rowSums(res$X)
+for(q in 1:Q0){
+  message(paste0("----- Featured words on Topic [", q, "] -----"))
+  print(paste0(rownames(Xp), "(",round(100*Xp[,q], 1), "%)")[Xp[,q]>=0.5])
+}
+
+par(mar=c(5,4,4,2)+0.1)
+```
+
+
