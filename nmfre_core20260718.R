@@ -1,17 +1,72 @@
+# NMF-RE estimation core -- 2026-07-18.
+# Supersedes nmfre_core20260627_fullEM.R.  Same outer-inner ECM, same EM-form variance
+# updates, same semi-NMF X-step with the posterior-variance term.  TWO corrections:
+#
+#  (1) The row-centering of U is REMOVED.  The U/Theta indeterminacy of the model is
+#      U -> U + Delta A , Theta -> Theta - Delta  (any Q x K Delta), so the condition that
+#      removes it is  U A' = 0 , not the row-centering U 1 = 0.  The alternating scheme
+#      attains U A' = 0 by itself at its fixed point; imposing the row-centering on top of
+#      that DESTROYS it whenever 1' is not in the row space of A.  Consequence, measured on
+#      the paper's examples:
+#         centered  : ||U A'|| = 63.9 (HS) / 1691.6 (OD);  profiled score 1.14 / 27.2 ;
+#                     Thetahat differs from the root of the profiled estimating equation by
+#                     9.1% (HS) / 19.8% (OD)
+#         uncentered: ||U A'|| = 0 ;  profiled score 8e-15 ;  Thetahat = that root exactly
+#      Sections 4 and Appendix B derive the inference by profiling the UNCENTERED ridge
+#      solution, so only the uncentered fit is the estimator the inference describes.
+#      (Orthodont was unaffected either way: 1' IS in the row space of its A, so the fixed
+#      point is already row-centered and ||U A'|| = 0.)
+#
+#  (2) The initial Theta is no longer clipped to be positive when theta_sign = "free".
+#      The old line  normalize_X(pmax(X,.eps), pmax(Theta,.eps), U)  applied pmax to Theta
+#      regardless of the sign convention, so any negative entry of a supplied Theta.ini was
+#      reset to +eps.  Harmless for a non-negative NMF initialisation, but the C2 full-refit
+#      bootstrap warm-starts from the fitted Theta, so under the sign-free default every
+#      refit began by destroying the sign of the effect being studied.
+#
 # ============================================================
-# NMF-RE (EU): Multiplier (Wild) Bootstrap + 1-step Newton
+# NMF-RE: Semi-NMF with Random Effects
+# Multiplier (Wild) Bootstrap + 1-step Newton
 # - Function name: nmf.re
 # - dfU cap: cap = dfU_cap_rate * (N*Q) unless dfU_cap (absolute) is supplied
 # - Wild weights: exp_centered only  (w ~ Exp(1) - 1; mean 0, var 1)
 #
-# [ALIGN 2026-01-11]
-# - X normalization now rescales BOTH Theta and U (identifiability-consistent)
-# - MU updates use positive-part stabilization:
-#     B_pos = pmax(ThetaA + U, 0) for X-step
-#     Y_star_pos = pmax(pmax(Y,0) - XU, 0) for Theta-step
+# [PROTOTYPE 2026-06-27 — COMPLETE-EM VARIANT]  derived from
+#   nmfre_core20260627_emsigma.R (which already uses the proper EM M-step for
+#   sigma^2).  This variant ALSO makes the X-step a genuine EM M-step by adding
+#   the posterior-variance term to the basis subproblem:
+#       X-step:  min_{X>=0}  ||Y - X(Theta A + Uhat)||_F^2 + tr( X S X' ),
+#       S = sum_n Cov(u_n | y_n) = N * sigma^2 * (X'X + lambda I)^{-1}  (E-step).
+#   The gradient adds +2 X S, so the Ding-Li-Jordan multiplicative update simply
+#   replaces B B' by G = B B' + S (S symmetric PD => monotone for the augmented
+#   objective).  With this change the X, Theta, sigma^2, tau^2 steps are ALL exact
+#   EM/ECM steps for the marginal Gaussian mixed model, i.e. a fully exact EM
+#   (controlled by x_postvar = TRUE; set FALSE to recover the emsigma behaviour).
+#
+# [REVISION 2026-06-23]  (Psychometrika PSY-2026-0040, Major Revision)
+# Revised from nmfre_core20260112.R. Key methodological changes:
+#  - Theta is now SIGN-FREE by default (theta_sign = "free"): the essential
+#    NMF constraint is X >= 0 (parts-based non-negative basis); the latent
+#    scores B = Theta A + U are real-valued. This makes NMF-RE a *semi-NMF*
+#    with random effects, and lets Theta be interpreted as covariate EFFECTS
+#    (positive, zero, or negative). theta_sign = "nonneg" recovers the old
+#    non-negative-Theta behaviour for compositional/intensity data.
+#  - Theta-step (free): exact closed-form least squares
+#      Theta = (X'X)^{-1} X' (Y - X U) A' (A A')^{-1},
+#    solving the stated subproblem exactly (no positive-part surrogate).
+#  - X-step: Ding-Li-Jordan (2010) semi-NMF multiplicative update, which is
+#    monotone-decreasing for X >= 0 with a sign-free score matrix B, replacing
+#    the previous positive-part B_pos = pmax(ThetaA + U, 0) stabilization.
+#    x_update = "mu" recovers the old positive-part multiplicative update.
+#  - Inference: for sign-free Theta the parameter is interior, so the default
+#    p-value is TWO-sided and bootstrap replicates are NOT projected to >= 0.
+#    For theta_sign = "nonneg" the boundary null (one-sided, project >= 0) is
+#    retained, matching the submitted manuscript.
+#
+# [ALIGN 2026-01-11] (inherited)
+# - X normalization rescales BOTH Theta and U (identifiability-consistent)
 # - Bootstrap score weights centered: w = rexp(N) - 1
-# - 1-step bootstrap replicates projected to Theta>=0
-# - Removed obsolete wild_weight options; only "exp_centered" remains
+# - Only "exp_centered" wild weights remain
 # ============================================================
 
 pmax_eps <- function(x, eps = 1e-10) pmax(x, eps)
@@ -20,6 +75,43 @@ safe_div <- function(num, den, eps = 1e-10) {
   res <- num / pmax_eps(den, eps)
   res[is.na(res) | is.infinite(res)] <- 0
   res
+}
+
+# ------------------------------------------------------------
+# Semi-NMF multiplicative update for X >= 0 with a sign-free
+# score matrix B (Ding, Li & Jordan, 2010, IEEE TPAMI 32(1):45-55).
+# Solves (monotonically) min_{X>=0} ||Y - X B||_F^2 with B real-valued:
+#   X <- X * sqrt( [ (Y B')+ + X (B B')- ] / [ (Y B')- + X (B B')+ ] ).
+# pos()/neg() are the elementwise positive/negative parts.
+# ------------------------------------------------------------
+.seminmf_update_X <- function(X, Y, B, eps = 1e-10) {
+  YBt <- Y %*% t(B)          # P x Q
+  BBt <- B %*% t(B)          # Q x Q
+  pos <- function(M) pmax(M, 0)
+  neg <- function(M) pmax(-M, 0)
+  numer <- pos(YBt) + X %*% neg(BBt)
+  denom <- neg(YBt) + X %*% pos(BBt)
+  X * sqrt(safe_div(numer, denom, eps = eps))
+}
+
+# ------------------------------------------------------------
+# COMPLETE-EM penalized semi-NMF update for X >= 0 (2026-06-27 prototype):
+# Solves (monotonically) min_{X>=0} ||Y - X B||_F^2 + tr(X S X'), where S is a
+# symmetric positive-definite matrix (here S = sum_n Cov(u_n|y_n), the E-step
+# posterior-variance contribution).  The penalty gradient adds +2 X S, so the
+# Ding-Li-Jordan update replaces B B' by G = B B' + S:
+#   X <- X * sqrt( [ (Y B')+ + X G- ] / [ (Y B')- + X G+ ] ),  G = B B' + S.
+# Monotonicity follows from the same auxiliary-function argument (the pos/neg
+# split applies to any symmetric matrix in the quadratic form tr(X G X')).
+# ------------------------------------------------------------
+.seminmf_update_X_pen <- function(X, Y, B, S, eps = 1e-10) {
+  YBt <- Y %*% t(B)              # P x Q
+  G   <- B %*% t(B) + S          # Q x Q symmetric
+  pos <- function(M) pmax(M, 0)
+  neg <- function(M) pmax(-M, 0)
+  numer <- pos(YBt) + X %*% neg(G)
+  denom <- neg(YBt) + X %*% pos(G)
+  X * sqrt(safe_div(numer, denom, eps = eps))
 }
 
 # ------------------------------------------------------------
@@ -89,32 +181,12 @@ normalize_X <- function(X, Theta, U = NULL, eps = 1e-12) {
 }
 
 # ============================================================
-# dfU helpers
+# dfU helper (diagnostic only)
 # dfU(lambda) = N * sum_i d_i/(d_i + lambda), where d_i are eigenvalues of XtX
 # ============================================================
 
 .dfU_from_lambda <- function(d, N, lambda) {
   N * sum(d / (d + lambda))
-}
-
-.lambda_for_dfU_cap <- function(d, N, target,
-                               lambda_min = 0,
-                               lambda_max = 1e12,
-                               tol = 1e-8) {
-  if (.dfU_from_lambda(d, N, lambda_min) <= target) return(lambda_min)
-
-  hi <- lambda_min
-  df_hi <- Inf
-  while (hi < lambda_max) {
-    hi <- max(1e-12, if (hi == 0) 1e-6 else hi * 10)
-    df_hi <- .dfU_from_lambda(d, N, hi)
-    if (df_hi <= target) break
-  }
-  if (df_hi > target) return(lambda_max)
-
-  f <- function(lam) .dfU_from_lambda(d, N, lam) - target
-  out <- stats::uniroot(f, lower = lambda_min, upper = hi, tol = tol)
-  out$root
 }
 
 # ============================================================
@@ -127,6 +199,17 @@ normalize_X <- function(X, Theta, U = NULL, eps = 1e-12) {
 # ============================================================
 nmf.re <- function(
   Y, A = NULL, Q = 2,
+
+  # ---- sign constraint on Theta and X-step variant ----
+  # theta_sign = "free"   : real-valued Theta (semi-NMF; covariate effects, default)
+  # theta_sign = "nonneg" : Theta >= 0 (compositional/intensity; submitted-paper behaviour)
+  theta_sign = c("free", "nonneg"),
+  # x_update = "seminmf"  : Ding et al. (2010) monotone semi-NMF update (default)
+  # x_update = "mu"       : legacy positive-part multiplicative update
+  x_update = c("seminmf", "mu"),
+  # x_postvar = TRUE: COMPLETE-EM X-step (add posterior-variance term tr(X S X'),
+  #   S = N*sigma2*(X'X+lambda I)^{-1}); FALSE recovers the conditional X-step.
+  x_postvar = TRUE,
 
   # ---- initialization ----
   X.ini = NULL, Theta.ini = NULL, U.ini = NULL,
@@ -150,16 +233,32 @@ nmf.re <- function(
   tau2_min = 1e-12,
   tau2_max = 1e12,
 
-  # ---- dfU control (NQ only) ----
-  dfU_control = c("cap", "off"),
-  dfU_cap = NULL,           # absolute cap (optional)
-  dfU_cap_rate = 0.10,      # cap = rate * (N*Q) (e.g., 0.05)
-  dfU_enforce_every = 1,
-  dfU_lambda_max = 1e12,
+  # ---- dfU control (DEPRECATED: no cap is applied) ----
+  # df_U is no longer capped: the variance components (sigma2, tau2) are
+  # estimated by ECM and df_U/(NQ) is reported only as a complexity diagnostic.
+  # These arguments are kept (inert) for backward compatibility with existing
+  # call sites; "cap" is accepted but behaves identically to "off".
+  dfU_control = c("off", "cap"),
+  dfU_cap = NULL,           # (inert) retained for backward compatibility
+  dfU_cap_rate = 0.10,      # (inert) retained for backward compatibility
+  dfU_enforce_every = 1,    # (inert)
+  dfU_lambda_max = 1e12,    # (inert)
 
   # ---- optimization ----
-  maxit = 50000,
-  epsilon = 1e-8,
+  # Outer-inner structure (revised 2026-06-26): the variance components
+  # (sigma2, tau2) and the dfU-cap are updated only on the OUTER loop; between
+  # outer updates lambda = sigma2/tau2 is held FIXED and the block-coordinate
+  # updates (U, X, Theta) are iterated to convergence on the INNER loop. Each
+  # inner phase therefore minimizes a single fixed-lambda objective and is
+  # monotone nonincreasing. maxit is the TOTAL inner-iteration budget.
+  maxit = 200000,            # TOTAL inner-iteration budget (backstop)
+  epsilon = 1e-8,            # inner (fixed-lambda) relative-change tolerance
+  inner_maxit = 10000,       # per-outer cap on inner iterations
+  outer_maxit = 500,         # max number of variance/lambda updates (generous:
+                             # the required count is data-dependent, so set it
+                             # high enough that non-convergence means "needs more",
+                             # not an artificial cutoff; e.g. HS1939 needs ~112)
+  epsilon_outer = 1e-6,      # outer convergence: relative change in lambda
   verbose = TRUE,
   seed = 1,
 
@@ -175,8 +274,10 @@ nmf.re <- function(
 
   cov_ridge = 1e-8,
 
-  # ---- p-value side for boundary null (Theta >= 0) ----
-  theta_p_side = c("one.sided","two.sided"),
+  # ---- p-value side ----
+  # NULL (default): resolved by theta_sign -- "two.sided" for free Theta
+  # (interior parameter), "one.sided" for nonneg (boundary null H0: Theta=0).
+  theta_p_side = NULL,
 
   # ---- multiplier (wild) bootstrap (executed when inference=TRUE) ----
   wild_B = 500,
@@ -199,7 +300,14 @@ nmf.re <- function(
   se_rule <- match.arg(se_rule)
   wild_weight <- match.arg(wild_weight)
   dfU_control <- match.arg(dfU_control)
-  theta_p_side <- match.arg(theta_p_side)
+  theta_sign <- match.arg(theta_sign)
+  x_update <- match.arg(x_update)
+
+  # Resolve p-value side from theta_sign unless the user set it explicitly.
+  if (is.null(theta_p_side)) {
+    theta_p_side <- if (theta_sign == "nonneg") "one.sided" else "two.sided"
+  }
+  theta_p_side <- match.arg(theta_p_side, c("one.sided", "two.sided"))
 
   if (!is.numeric(dfU_cap_rate) || length(dfU_cap_rate) != 1 ||
       !is.finite(dfU_cap_rate) || dfU_cap_rate <= 0) {
@@ -236,7 +344,9 @@ nmf.re <- function(
   }
 
   # ---- normalize X columns to sum 1 (rescale Theta AND U) ----
-  normed <- normalize_X(pmax(X, .eps), pmax(Theta, .eps), U)
+  ## 2026-07-18: clip the initial Theta only when it is constrained to be non-negative.
+  Theta_ini0 <- if (theta_sign == "nonneg") pmax(Theta, .eps) else Theta
+  normed <- normalize_X(pmax(X, .eps), Theta_ini0, U)
   X <- normed$X
   Theta <- normed$Theta
   U <- normed$U
@@ -254,6 +364,7 @@ nmf.re <- function(
 
   obj_trace <- if (isTRUE(save_obj_trace)) rep(NA_real_, maxit) else NULL
   rss_trace <- if (isTRUE(save_obj_trace)) rep(NA_real_, maxit) else NULL
+  nll_trace <- if (isTRUE(save_obj_trace)) rep(NA_real_, maxit) else NULL  # marginal negative log-likelihood (ECM objective)
 
   # ---- dfU diagnostics ----
   dfU_last <- NA_real_
@@ -266,158 +377,174 @@ nmf.re <- function(
   # =========================================================
   # main loop
   # =========================================================
-  for (iter in 1:maxit) {
-    iter_done <- iter
+  # Does lambda move at all across outer steps? (variance updates or a cap whose
+  # floor tracks X). If not, a single outer pass = pure fixed-lambda descent.
+  any_var_update <- isTRUE(sigma2_update) || isTRUE(tau2_update)
 
-    # (0) current components
-    ThetaA <- Theta %*% A  # Q x N
+  total_iter <- 0L
+  lambda <- sigma2 / tau2
+  outer_break_iters <- integer(0)   # cumulative inner-iteration index at each outer boundary
+  lambda_path <- numeric(0)         # lambda used in each outer (inner) phase
 
-    # (1) U-step: ridge BLUP with lambda = sigma2/tau2
-    tau2 <- clip_val(tau2, tau2_min, tau2_max)
+  for (outer in 1:outer_maxit) {
+
+    # ----- fix lambda for this inner solve (variance held constant) -----
+    tau2   <- clip_val(tau2,   tau2_min,   tau2_max)
     sigma2 <- clip_val(sigma2, sigma2_min, sigma2_max)
     lambda <- sigma2 / tau2
 
-    XtX <- crossprod(X)  # Q x Q
-
-    # ---- dfU cap enforcement ----
-    if (dfU_control == "cap" && (iter %% dfU_enforce_every == 0)) {
-
-      dfU_cap_now <- if (!is.null(dfU_cap)) dfU_cap else dfU_cap_rate * (N * Q)
-      dfU_cap_now <- max(dfU_cap_now, 1)
-
-      d <- eigen(XtX, symmetric = TRUE, only.values = TRUE)$values
-      d <- pmax(d, 0)
-
-      dfU_now <- .dfU_from_lambda(d, N, lambda)
-
-      if (dfU_now > dfU_cap_now) {
-        lambda_new <- .lambda_for_dfU_cap(
-          d, N, target = dfU_cap_now,
-          lambda_min = pmax(lambda, 0),
-          lambda_max = dfU_lambda_max
-        )
-        lambda <- lambda_new
-        tau2 <- clip_val(sigma2 / pmax(lambda, 1e-12), tau2_min, tau2_max)
-        dfU_now <- .dfU_from_lambda(d, N, lambda)
-
-        dfU_hit_cap <- TRUE
-        dfU_hit_iter <- c(dfU_hit_iter, iter)
-      }
-
-      dfU_last <- dfU_now
-      dfU_cap_last <- dfU_cap_now
-    }
-
+    lambda_used <- lambda
     lambda_last <- lambda
 
-    M <- XtX + diag(pmax(lambda, 1e-12), Q)
-    cholM <- tryCatch(chol(M), error = function(e) NULL)
-    if (is.null(cholM)) stop("Cholesky failed: XtX + lambda I not SPD. Increase lambda (or decrease tau2).")
+    # ----- INNER: fixed-lambda block-coordinate descent (monotone) -----
+    obj_prev_inner <- Inf
+    inner_done <- 0L
+    for (inner in 1:inner_maxit) {
+      total_iter <- total_iter + 1L
+      iter_done  <- total_iter
+      inner_done <- inner
 
-    # residual without U
-    fit_fixed <- X %*% ThetaA
-    R0 <- Y - fit_fixed
-
-    # solve for each column u_n
-    for (n in 1:N) {
-      rhs <- crossprod(X, R0[, n, drop = FALSE])  # Q x 1
-      u <- backsolve(cholM, forwardsolve(t(cholM), rhs))
-      U[, n] <- as.numeric(u)
-    }
-
-    # center U (identifiability)
-    U <- sweep(U, 1, rowMeans(U), "-")
-
-    # (1.5) tau2 update by moment matching (disabled when dfU cap is on)
-    if (isTRUE(tau2_update) && dfU_control != "cap" &&
-        iter >= tau2_update_start && (iter %% tau2_update_every == 0)) {
-
-      term1 <- sum(U^2) / (N * Q)
-
-      Minv <- tryCatch(chol2inv(cholM), error = function(e) NULL)
-      if (!is.null(Minv)) {
-        term2 <- sigma2 * sum(diag(Minv)) / Q
-        tau2_new <- clip_val(term1 + term2, tau2_min, tau2_max)
-        tau2 <- (1 - tau2_update_rate) * tau2 + tau2_update_rate * tau2_new
-      }
-    }
-
-    # (2) X-step (EU MU) with positive-part stabilization
-    Y_tilde <- pmax(Y, 0)
-    B_sem <- ThetaA + U
-    B_pos <- pmax(B_sem, 0)
-
-    numX <- Y_tilde %*% t(B_pos)
-    denX <- X %*% (B_pos %*% t(B_pos))
-    X <- X * safe_div(numX, denX, eps = .eps)
-    X <- pmax(X, .eps)
-
-    # normalize columns sum 1; absorb scale into Theta AND U
-    normed <- normalize_X(X, Theta, U)
-    X <- pmax(normed$X, .eps)
-    Theta <- pmax(normed$Theta, .eps)
-    U <- normed$U
-
-    # (3) Theta-step (EU MU) with positive-part stabilization
-    Y_star <- Y_tilde - X %*% U
-    Y_star_pos <- pmax(Y_star, 0)
-
-    numT <- crossprod(X, Y_star_pos) %*% t(A)
-    denT <- (crossprod(X, X) %*% Theta) %*% (A %*% t(A))
-    Theta <- Theta * safe_div(numT, denT, eps = .eps)
-    Theta <- pmax(Theta, .eps)
-
-    # (3.5) sigma2 update from residual (optional; iteration-scale)
-    if (isTRUE(sigma2_update) && iter >= sigma2_update_start && (iter %% sigma2_update_every == 0)) {
       ThetaA <- Theta %*% A
-      fit <- X %*% (ThetaA + U)
-      R <- Y - fit
-      sigma2_new <- clip_val(mean(R^2), sigma2_min, sigma2_max)
-      sigma2 <- (1 - sigma2_update_rate) * sigma2 + sigma2_update_rate * sigma2_new
-    }
 
-    # (4) objective & convergence (uses raw ThetaA+U, not truncated)
-    ThetaA <- Theta %*% A
-    fit <- X %*% (ThetaA + U)
-    R <- Y - fit
-
-    lambda_obj <- sigma2 / clip_val(tau2, tau2_min, tau2_max)
-    obj <- sum(R^2) + lambda_obj * sum(U^2)
-    rss <- sum(R^2)
-
-    if (isTRUE(save_obj_trace)) {
-      obj_trace[iter] <- obj
-      rss_trace[iter] <- rss
-    }
-
-    if (is.finite(obj_prev)) {
-      rel_change <- abs(obj_prev - obj) / (abs(obj_prev) + .eps)
-    } else {
-      rel_change <- NA_real_
-    }
-
-    if (!is.finite(obj)) {
-      stop_reason <- "nonfinite_obj"
-      converged <- FALSE
-      break
-    }
-
-    if (is.finite(obj_prev) && rel_change < epsilon) {
-      stop_reason <- "epsilon"
-      converged <- TRUE
-      break
-    }
-
-    obj_prev <- obj
-
-    if (verbose && iter %% 100 == 0) {
-      cat(sprintf("iter=%d  obj=%.6g  rel=%.3g  sigma2=%.4g  tau2=%.4g  lambda=%.4g",
-                  iter, obj, rel_change, sigma2, tau2, sigma2 / tau2))
-      if (dfU_control == "cap" && is.finite(dfU_last)) {
-        cat(sprintf("  dfU=%.2f cap=%.2f lam_enf=%.4g", dfU_last, dfU_cap_last, lambda_last))
+      # (1) U-step: ridge / BLUP at the fixed lambda
+      XtX   <- crossprod(X)
+      M     <- XtX + diag(pmax(lambda, 1e-12), Q)
+      cholM <- tryCatch(chol(M), error = function(e) NULL)
+      if (is.null(cholM)) stop("Cholesky failed: XtX + lambda I not SPD. Increase lambda (or decrease tau2).")
+      R0 <- Y - X %*% ThetaA
+      for (n in 1:N) {
+        rhs <- crossprod(X, R0[, n, drop = FALSE])
+        U[, n] <- as.numeric(backsolve(cholM, forwardsolve(t(cholM), rhs)))
       }
-      cat("\n")
+      ## NOTE (2026-07-18): the row-centering of U was removed here; the fixed point
+      ## satisfies U A' = 0, which is the condition that identifies U against Theta.
+      ## See the header.
+
+      # (2) X-step: X >= 0 with sign-free score matrix B = ThetaA + U
+      B_sem <- ThetaA + U
+      if (x_update == "seminmf") {
+        if (isTRUE(x_postvar)) {
+          ## COMPLETE-EM X-step: S = sum_n Cov(u_n|y_n) = N*sigma2*(X'X+lambda I)^{-1}.
+          ## cholM = chol(X'X + lambda I) was just formed for the U-step (same X).
+          S_pv <- N * clip_val(sigma2, sigma2_min, sigma2_max) * chol2inv(cholM)
+          X <- .seminmf_update_X_pen(X, Y, B_sem, S_pv, eps = .eps)
+        } else {
+          X <- .seminmf_update_X(X, Y, B_sem, eps = .eps)
+        }
+      } else {
+        Y_tilde <- pmax(Y, 0); B_pos <- pmax(B_sem, 0)
+        numX <- Y_tilde %*% t(B_pos)
+        denX <- X %*% (B_pos %*% t(B_pos))
+        X <- X * safe_div(numX, denX, eps = .eps)
+      }
+      X <- pmax(X, .eps)
+      normed <- normalize_X(X, Theta, U)
+      X     <- pmax(normed$X, .eps)
+      Theta <- if (theta_sign == "nonneg") pmax(normed$Theta, .eps) else normed$Theta
+      U     <- normed$U
+
+      # (3) Theta-step
+      if (theta_sign == "free") {
+        Y_star <- Y - X %*% U
+        XtX_t  <- crossprod(X) + diag(1e-10, Q)
+        AAt_t  <- tcrossprod(A) + diag(1e-10, K)
+        rhs    <- crossprod(X, Y_star) %*% t(A)
+        Theta  <- solve(XtX_t, rhs)
+        Theta  <- t(solve(AAt_t, t(Theta)))
+      } else {
+        Y_tilde <- pmax(Y, 0); Y_star <- Y_tilde - X %*% U; Y_star_pos <- pmax(Y_star, 0)
+        numT <- crossprod(X, Y_star_pos) %*% t(A)
+        denT <- (crossprod(X, X) %*% Theta) %*% (A %*% t(A))
+        Theta <- Theta * safe_div(numT, denT, eps = .eps)
+        Theta <- pmax(Theta, .eps)
+      }
+
+      # (4) objective at the FIXED lambda (this is what the inner loop minimizes)
+      ThetaA <- Theta %*% A
+      R   <- Y - X %*% (ThetaA + U)
+      obj <- sum(R^2) + lambda * sum(U^2)
+      rss <- sum(R^2)
+      if (isTRUE(save_obj_trace) && total_iter <= maxit) {
+        obj_trace[total_iter] <- obj
+        rss_trace[total_iter] <- rss
+        # marginal negative log-likelihood: y_n ~ N(X Theta a_n, sigma2 I + tau2 X X^T)
+        Rm   <- Y - X %*% ThetaA                      # P x N fixed-effects residual
+        XtRm <- crossprod(X, Rm)                      # Q x N
+        Mll  <- crossprod(X) + diag(pmax(lambda, 1e-12), Q)
+        quad <- (sum(Rm^2) - sum(XtRm * solve(Mll, XtRm))) / clip_val(sigma2, sigma2_min, sigma2_max)
+        logdetQ <- as.numeric(determinant(diag(Q) + (tau2 / clip_val(sigma2, sigma2_min, sigma2_max)) * crossprod(X),
+                                          logarithm = TRUE)$modulus)
+        nll_trace[total_iter] <- 0.5 * (N * (P * log(2 * pi) + P * log(clip_val(sigma2, sigma2_min, sigma2_max)) + logdetQ) + quad)
+      }
+
+      if (!is.finite(obj)) { stop_reason <- "nonfinite_obj"; converged <- FALSE; break }
+
+      rel_change <- if (is.finite(obj_prev_inner))
+        abs(obj_prev_inner - obj) / (abs(obj_prev_inner) + .eps) else NA_real_
+      if (is.finite(obj_prev_inner) && rel_change < epsilon) break   # inner converged
+      obj_prev_inner <- obj
+      if (total_iter >= maxit) break                                  # total budget exhausted
     }
+
+    outer_break_iters <- c(outer_break_iters, total_iter)
+    lambda_path <- c(lambda_path, lambda_used)
+
+    if (identical(stop_reason, "nonfinite_obj")) break
+
+    # ----- OUTER: variance-component update from the converged inner fit -----
+    ThetaA <- Theta %*% A
+    R <- Y - X %*% (ThetaA + U)
+
+    # ===== EM-SIGMA VARIANT (2026-06-27) =====================================
+    # PROPER JOINT EM M-STEP for (sigma2, tau2) of the marginal mixed model
+    # y_n ~ N(X Theta a_n, sigma2 I + tau2 X X^T), treating u_n as the latent
+    # variable with posterior Cov(u_n | y_n) = sigma2 (X'X + lambda I)^{-1}.
+    # The inner loop has converged at the FIXED lambda = sigma2_old/tau2_old, so
+    # sigma2/tau2 here are the E-step values; both M-steps use that sigma2_old:
+    #   sigma2_new = ||R||_F^2/(PN) + sigma2_old * dfU/(PN),  dfU = N*tr(H_lambda)
+    #   tau2_new   = ||U||_F^2/(NQ) + (sigma2_old/Q)*tr((X'X+lambda I)^{-1})
+    # with tr(H_lambda) = Q - lambda*tr((X'X+lambda I)^{-1}).  This is the ONLY
+    # change from nmfre_core20260626.R: the original sigma2-step used the naive
+    # residual mean square ||R||_F^2/(PN) (it OMITTED the +sigma2*dfU/(PN) term),
+    # so it was a residual-moment update, not the EM M-step.  At the fixed point
+    # this sigma2-step gives sigma2* = ||R||_F^2/(PN - dfU) (df-adjusted).
+    sigma2_old <- sigma2
+    Minv <- NULL
+    if (isTRUE(sigma2_update) || isTRUE(tau2_update)) {
+      Minv <- tryCatch(chol2inv(chol(crossprod(X) + diag(pmax(lambda, 1e-12), Q))),
+                       error = function(e) NULL)
+    }
+    if (isTRUE(sigma2_update)) {
+      if (!is.null(Minv)) {
+        trH   <- Q - pmax(lambda, 1e-12) * sum(diag(Minv))   # tr(H_lambda) in [0,Q]
+        dfU_e <- N * trH
+        sigma2 <- clip_val(mean(R^2) + sigma2_old * dfU_e / (P * N), sigma2_min, sigma2_max)
+      } else {
+        sigma2 <- clip_val(mean(R^2), sigma2_min, sigma2_max)   # fallback: naive
+      }
+    }
+    if (isTRUE(tau2_update)) {
+      term1 <- sum(U^2) / (N * Q)
+      if (!is.null(Minv)) {
+        tau2 <- clip_val(term1 + sigma2_old * sum(diag(Minv)) / Q, tau2_min, tau2_max)
+      }
+    }
+    # ===== end EM-SIGMA VARIANT ==============================================
+
+    # lambda after the variance update (pure ECM; no cap)
+    lambda_new <- clip_val(sigma2, sigma2_min, sigma2_max) / clip_val(tau2, tau2_min, tau2_max)
+
+    if (verbose) {
+      cat(sprintf("[outer %d] inner=%d obj=%.6g sigma2=%.4g tau2=%.4g lambda %.4g -> %.4g\n",
+                  outer, inner_done, obj, sigma2, tau2, lambda_used, lambda_new))
+    }
+
+    # ----- outer convergence -----
+    if (!any_var_update) { converged <- TRUE; stop_reason <- "fixed_lambda"; break }
+    if (abs(lambda_new - lambda_used) / (abs(lambda_used) + .eps) < epsilon_outer) {
+      converged <- TRUE; stop_reason <- "outer_lambda"; break
+    }
+    if (total_iter >= maxit) { stop_reason <- "maxit"; converged <- FALSE; break }
   }
 
   # ---- post loop: finalize convergence fields robustly ----
@@ -454,11 +581,7 @@ nmf.re <- function(
   d_final <- pmax(d_final, 0)
   dfU_final <- .dfU_from_lambda(d_final, N, lambda_final)
 
-  if (dfU_control == "cap") {
-    dfU_cap_last <- if (!is.null(dfU_cap)) max(dfU_cap, 1) else max(dfU_cap_rate * (N * Q), 1)
-  } else {
-    dfU_cap_last <- NA_real_
-  }
+  dfU_cap_last <- NA_real_   # no cap is applied
   dfU_last <- dfU_final
   lambda_last <- lambda_final
 
@@ -597,8 +720,9 @@ nmf.re <- function(
 
       theta_b <- theta_hat_vec - as.vector(Hinv %*% grad_b)
 
-      # project to Theta>=0 (paper-consistent)
-      theta_b <- pmax(theta_b, 0)
+      # project to Theta>=0 only under the non-negative (boundary) variant;
+      # for sign-free Theta the parameter is interior, so no projection.
+      if (theta_sign == "nonneg") theta_b <- pmax(theta_b, 0)
 
       Theta_boot[, b] <- theta_b
     }
@@ -668,26 +792,6 @@ nmf.re <- function(
     }
   }
 
-  # ---- Post-run message: dfU cap ----
-  if (isTRUE(post_message) && dfU_control == "cap" &&
-      is.finite(dfU_last) && is.finite(dfU_cap_last)) {
-    dfU_cap_now <- dfU_cap_last
-    if (isTRUE(dfU_hit_cap)) {
-      message(sprintf(
-        "[dfU-cap] Activated: dfU reached the cap during optimization.\nFinal dfU = %.2f (%.1f%% of NQ), cap = %.2f (%.1f%% of NQ).\nFirst activated at iter %d (hits=%d).",
-        dfU_last, 100 * (dfU_last / (N * Q)),
-        dfU_cap_now, 100 * (dfU_cap_now / (N * Q)),
-        dfU_hit_iter[1], length(dfU_hit_iter)
-      ))
-    } else {
-      message(sprintf(
-        "[dfU-cap] Not activated: dfU never reached the cap.\nFinal dfU = %.2f (%.1f%% of NQ), cap = %.2f (%.1f%% of NQ).",
-        dfU_last, 100 * (dfU_last / (N * Q)),
-        dfU_cap_now, 100 * (dfU_cap_now / (N * Q))
-      ))
-    }
-  }
-
   # ---- convenience probabilities ----
   colnorm_prob <- function(M, eps = 1e-12) {
     cs <- colSums(M)
@@ -713,6 +817,9 @@ nmf.re <- function(
     rel_change_final = rel_change_final,
     obj_trace = if (isTRUE(save_obj_trace)) obj_trace[seq_len(iter_done)] else NULL,
     rss_trace = if (isTRUE(save_obj_trace)) rss_trace[seq_len(iter_done)] else NULL,
+    nll_trace = if (isTRUE(save_obj_trace)) nll_trace[seq_len(iter_done)] else NULL,
+    outer_break_iters = outer_break_iters,
+    lambda_path = lambda_path,
 
     # dfU diagnostics (final-consistent)
     dfU = dfU_last,
@@ -745,8 +852,10 @@ nmf.re <- function(
     Theta.ci.upper = Theta.ci.upper,
     Theta.boot.sd  = Theta.boot.sd,
 
-    # record inference option
-    theta_p_side = theta_p_side
+    # record inference / method options
+    theta_p_side = theta_p_side,
+    theta_sign = theta_sign,
+    x_update = x_update
   )
 
   class(out) <- "nmfre"
@@ -864,93 +973,5 @@ summary.nmfre <- function(object,
 }
 
 
-# ============================================================
-# Utility: scan dfU_cap_rate
-# ============================================================
-scan_dfU_cap_rate <- function(
-  rates = (1:10) / 100,
-  Y, A, Q,
-  X.ini = NULL, Theta.ini = NULL, U.ini = NULL,
-  verbose = FALSE,
-  ...,
-
-  ok_upper = 1.00,
-  warn_upper = 0.80,
-
-  digits = list(dfU = 2, ratio = 2, lambda = 4, tau2 = 4, sigma2 = 4)
-) {
-  N <- ncol(Y)
-  NQ <- N * Q
-
-  one_run <- function(rate) {
-
-    r <- nmf.re(
-      Y = Y, A = A, Q = Q,
-      X.ini = X.ini, Theta.ini = Theta.ini, U.ini = U.ini,
-      verbose = verbose,
-      dfU_control = "cap",
-      dfU_cap_rate = rate,
-      ...
-    )
-
-    ratio <- if (is.finite(r$dfU) && is.finite(r$dfU_cap) && r$dfU_cap > 0) {
-      r$dfU / r$dfU_cap
-    } else {
-      NA_real_
-    }
-
-    status <- NA_character_
-    if (is.finite(ratio)) {
-      if (ratio >= 0.99) status <- "NG"
-      if (ratio >= 0.80 && ratio < 0.99) status <- "BETTER"
-      if (ratio > 0 && ratio < 0.80) status <- "GOOD"
-    }
-
-    data.frame(
-      rate = rate,
-      dfU_cap = r$dfU_cap,
-      dfU = round(r$dfU, 2),
-      ratio = round(ratio, 2),
-      status = status,
-      converged = isTRUE(r$converged),
-      tau2 = round(r$tau2, 3),
-      sigma2 = round(r$sigma2, 3),
-      stringsAsFactors = FALSE
-    )
-  }
-  out <- do.call(rbind, lapply(rates, one_run))
-  rownames(out) <- NULL
-  out
-}
-
-
-.dfU_from_lambda <- function(d, N, lambda) {
-  N * sum(d / (d + lambda))
-}
-
-.lambda_for_dfU_cap <- function(d, N, target,
-                               lambda_min = 0,
-                               lambda_max = 1e12,
-                               tol = 1e-8) {
-  if (.dfU_from_lambda(d, N, lambda_min) <= target) return(lambda_min)
-
-  hi <- lambda_min
-  df_hi <- Inf
-  while (hi < lambda_max) {
-    hi <- max(1e-12, if (hi == 0) 1e-6 else hi * 10)
-    df_hi <- .dfU_from_lambda(d, N, hi)
-    if (df_hi <= target) break
-  }
-  if (df_hi > target) return(lambda_max)
-
-  f <- function(lam) .dfU_from_lambda(d, N, lam) - target
-  out <- stats::uniroot(f, lower = lambda_min, upper = hi, tol = tol)
-  out$root
-}
-
-
-  # ---- convenience probabilities ----
-  colnorm_prob <- function(M, eps = 1e-12) {
-    cs <- colSums(M)
-    sweep(M, 2, pmax(cs, eps), "/")
-  }
+# (scan_dfU_cap_rate and the .lambda_for_dfU_cap helper were removed together
+#  with the dfU-cap procedure; df_U is now reported as a diagnostic only.)
