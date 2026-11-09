@@ -1,0 +1,12 @@
+v5 2800 replicates | 2026-11-02 07:40:43
+      err  eps   n km_degenerate spa_degenerate spa_chosen loss_gt_0.01 loss_gt_1 loss_gt_1_km_not_degenerate  max_loss
+ gaussian 0.00 500             0              0        272            1         0                           0 3.040e-02
+   varhet 0.00 200             0              0        107            0         0                           0 5.292e-05
+ gaussian 0.05 500             0              0        275            0         0                           0 5.969e-03
+   varhet 0.05 200             0              0        103            0         0                           0 2.112e-03
+ gaussian 0.10 500             0              0        279            1         0                           0 1.224e-02
+   varhet 0.10 200             0              0        106            0         0                           0 1.309e-03
+ gaussian 0.20 500             1              1        271            0         0                           0 3.122e-03
+   varhet 0.20 200             0              0        108            0         0                           0 1.238e-03
+all: k-means alone loses > 1 in 0 of 2800, of which k-means was not flagged degenerate in 0
+DONE 2026-11-02 07:40:43

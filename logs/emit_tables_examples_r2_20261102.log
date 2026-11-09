@@ -1,0 +1,39 @@
+%% tab:topic_theta (body)
+Early (1775--1865)      & Topic 1 &  87.776 & 14.792 & 14.566 &  5.93 & $<0.001$ \\
+Early (1775--1865)      & Topic 2 & 124.066 & 31.324 & 29.820 &  3.96 & $<0.001$ \\
+Early (1775--1865)      & Topic 3 &  21.312 &  6.235 &  6.239 &  3.42 & $<0.001$ \\
+Industrial (1865--1945) & Topic 1 & 156.572 & 28.103 & 28.685 &  5.57 & $<0.001$ \\
+Industrial (1865--1945) & Topic 2 &   0.000 & 12.952 &  7.280 &  0.00 & 0.5000 \\
+Industrial (1865--1945) & Topic 3 &  70.793 & 19.072 & 18.267 &  3.71 & $<0.001$ \\
+Postwar (1945--)        & Topic 1 &   0.000 & 13.860 &  8.040 &  0.00 & 0.5000 \\
+Postwar (1945--)        & Topic 2 &   0.000 & 10.161 &  5.001 &  0.00 & 0.5000 \\
+Postwar (1945--)        & Topic 3 & 240.881 & 14.177 & 13.536 & 16.99 & $<0.001$ \\
+
+%% tab:odhub_theta (body)
+Tokyo    & Region1 &  10.577 &  0.892 &  0.842 & 11.85 & $<0.001$ \\
+Tokyo    & Region2 &   0.000 &  0.596 &  0.331 &  0.00 & 0.5000 \\
+Tokyo    & Region3 &   0.000 &  0.283 &  0.156 &  0.00 & 0.5000 \\
+Osaka    & Region1 &   0.000 &  0.762 &  0.421 &  0.00 & 0.5000 \\
+Osaka    & Region2 &  10.509 &  0.804 &  0.818 & 13.08 & $<0.001$ \\
+Osaka    & Region3 &   0.000 &  0.501 &  0.262 &  0.00 & 0.5000 \\
+Fukuoka  & Region1 &   0.000 &  0.635 &  0.286 &  0.00 & 0.5000 \\
+Fukuoka  & Region2 &   0.000 &  1.052 &  0.496 &  0.00 & 0.5000 \\
+Fukuoka  & Region3 &   7.065 &  0.466 &  0.462 & 15.15 & $<0.001$ \\
+
+%% tab:example_summary (rows; R1 column order N, P, Q, NQ, sigma2, tau2, lambda, df_U, r)
+HS1939      & 300 & 9  & 3 & 900  & 0.01527 & 0.2617 & 0.0583 & 642.62 & 0.714 \\
+College     & 777 & 8  & 2 & 1554 & 0.01351 & 0.2556 & 0.0528 & 1013.25 & 0.652 \\
+Orthodont   & 27  & 4  & 1 & 27   & 1.933 & 48.19 & 0.0401 & 23.28 & 0.862 \\
+Topic model & 59  & 67 & 3 & 177  & 7.790 & 5746.4 & 0.0014 & 154.20 & 0.871 \\
+OD--HUB     & 47  & 44 & 3 & 141  & 3.264 & 235.82 & 0.0138 & 109.66 & 0.778 \\
+null device 
+          1 
+Topic1 words with share > 0.5: upon, shall, public, national, justice, congress, laws, law, among
+Topic2 words with share > 0.5: states, power, constitution, union, spirit, rights, liberty, interests, state, foreign, powers
+Topic3 words with share > 0.5: must, world, nation, peace, new, time, america, freedom, american, let, life, work, hope, know, fellow, history, today
+era proportions (Topic1, Topic2, Topic3):
+  Basis1 Basis3 Basis2
+1  0.376  0.532  0.091
+2  0.689  0.000  0.311
+3  0.000  0.000  1.000
+WROTE Figure4_r2_20261102.pdf

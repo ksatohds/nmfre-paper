@@ -1,0 +1,43 @@
+nmfkc 1.0.3 from /home/ksa/Rlib_dev_a343c39 | R 4.6.1 | cores 5 | OPENBLAS_NUM_THREADS 1 | 2026-11-02 07:44:15
+
+== hs: start spa seed 1 | NLL -1199.3415 (C81 -1199.3415, diff 0.0e+00) | 4901 iterations, 38 outer steps, stop outer_lambda | 7 s + 1 s
+   marginal NLL, within inner loops: max relative increase -4.15e-12 (0 increases of 4863 steps)
+   marginal NLL, across outer steps: max relative increase -4.76e-12 (0 increases of 37)
+   working objective at fixed lambda, within inner loops: max relative increase 3.42e-03 (4771 increases)
+   NLL from -1067.2020 to -1199.3415
+   fixed (sigma2, tau2): 703 iterations, stop fixed_lambda | NLL end -1199.3415 | NLL max relative increase -6.18e-11 (0) | objective 6.08e-03 (629)
+
+== college: start kmeans seed 1 | NLL -3614.3527 (C81 -3614.3527, diff 0.0e+00) | 3015 iterations, 28 outer steps, stop outer_lambda | 5 s + 1 s
+   marginal NLL, within inner loops: max relative increase -6.20e-12 (0 increases of 2987 steps)
+   marginal NLL, across outer steps: max relative increase -6.56e-12 (0 increases of 27)
+   working objective at fixed lambda, within inner loops: max relative increase 1.97e-03 (2923 increases)
+   NLL from -3329.3404 to -3614.3527
+   fixed (sigma2, tau2): 755 iterations, stop fixed_lambda | NLL end -3614.3527 | NLL max relative increase -1.93e-11 (0) | objective 2.97e-03 (705)
+
+== topic: start kmeans seed 1 | NLL 9882.4675 (C81 9882.4675, diff 0.0e+00) | 973 iterations, 45 outer steps, stop outer_lambda | 2 s + 1 s
+   marginal NLL, within inner loops: max relative increase -2.62e-13 (0 increases of 928 steps)
+   marginal NLL, across outer steps: max relative increase -2.86e-13 (0 increases of 44)
+   working objective at fixed lambda, within inner loops: max relative increase 5.36e-05 (247 increases)
+   NLL from 9907.2565 to 9882.4675
+   fixed (sigma2, tau2): 258 iterations, stop fixed_lambda | NLL end 9882.4675 | NLL max relative increase -2.03e-11 (0) | objective 3.86e-05 (246)
+
+== orthodont: start kmeans seed 1 | NLL 215.5869 (C81 215.5869, diff 0.0e+00) | 23 iterations, 11 outer steps, stop outer_lambda | 0 s + 0 s
+   marginal NLL, within inner loops: max relative increase -4.32e-11 (0 increases of 12 steps)
+   marginal NLL, across outer steps: max relative increase -5.83e-11 (0 increases of 10)
+   working objective at fixed lambda, within inner loops: max relative increase -1.73e-10 (0 increases)
+   NLL from 215.6380 to 215.5869
+   fixed (sigma2, tau2): 3 iterations, stop fixed_lambda | NLL end 215.5869 | NLL max relative increase -1.46e-08 (0) | objective -6.69e-08 (0)
+
+== odhub: start kmeans seed 1 | NLL 4266.3191 (C81 4266.3191, diff 0.0e+00) | 624 iterations, 34 outer steps, stop outer_lambda | 1 s + 0 s
+   marginal NLL, within inner loops: max relative increase -1.24e-14 (0 increases of 590 steps)
+   marginal NLL, across outer steps: max relative increase -3.84e-14 (0 increases of 33)
+   working objective at fixed lambda, within inner loops: max relative increase 1.46e-04 (110 increases)
+   NLL from 4381.9297 to 4266.3191
+   fixed (sigma2, tau2): 55 iterations, stop fixed_lambda | NLL end 4266.3191 | NLL max relative increase -3.65e-12 (0) | objective 1.86e-04 (52)
+null device 
+          1 
+null device 
+          1 
+
+WROTE Figure_nll_monotone_r2_20261102.pdf/.png
+DONE 2026-11-02 07:44:24

@@ -1,0 +1,27 @@
+check_prof_reached_20261109 | 2026-11-09 11:11:37 
+class: list 
+names: D, I, W, tab, by_coef 
+
+ s$D : columns prof_reached  nrow 25200 
+   prof_reached : class logical  min 1  mean 1  n<1: 0  NA: 0 
+       err  eps prof_reached.n prof_reached.not_reached prof_reached.na
+1 gaussian 0.00           4500                        0               0
+2   varhet 0.00           1800                        0               0
+3 gaussian 0.05           4500                        0               0
+4   varhet 0.05           1800                        0               0
+5 gaussian 0.10           4500                        0               0
+6   varhet 0.10           1800                        0               0
+7 gaussian 0.20           4500                        0               0
+8   varhet 0.20           1800                        0               0
+
+ s$tab : columns prof_reached  nrow 8 
+   prof_reached : class numeric  min 1  mean 1  n<1: 0  NA: 0 
+       err  eps prof_reached.n prof_reached.not_reached prof_reached.na
+1 gaussian 0.00              1                        0               0
+2   varhet 0.00              1                        0               0
+3 gaussian 0.05              1                        0               0
+4   varhet 0.05              1                        0               0
+5 gaussian 0.10              1                        0               0
+6   varhet 0.10              1                        0               0
+7 gaussian 0.20              1                        0               0
+8   varhet 0.20              1                        0               0

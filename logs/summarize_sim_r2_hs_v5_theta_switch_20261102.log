@@ -1,0 +1,118 @@
+replicates 2800, coefficient rows 25200 | 2026-11-02 16:16:26
+
+== switching rule (wild if the estimated region is a point, else profile): pooled over the nine effects ==
+      err  eps point cov_wild cov_prof cov_switch size0_switch power_switch
+ gaussian 0.00 0.784    0.925    0.942      0.931       0.0680        0.814
+ gaussian 0.05 0.580    0.923    0.948      0.937       0.0610        0.783
+ gaussian 0.10 0.344    0.918    0.956      0.948       0.0540        0.737
+ gaussian 0.20 0.070    0.876    0.966      0.963       0.0370        0.583
+   varhet 0.00 0.795    0.909    0.927      0.918       0.0700        0.794
+   varhet 0.05 0.635    0.902    0.928      0.916       0.0700        0.769
+   varhet 0.10 0.450    0.895    0.929      0.920       0.0525        0.740
+   varhet 0.20 0.135    0.843    0.911      0.905       0.0525        0.634
+
+== recovery of Theta: bias and RMSE of the estimate against the canonical target, by coefficient ==
+      err  eps         coef target     bias   rmse
+ gaussian 0.00   age.rev:B1  0.000  0.00950 0.1968
+ gaussian 0.00   age.rev:B2  0.813  0.02472 0.2175
+ gaussian 0.00   age.rev:B3 -0.727 -0.03791 0.2251
+ gaussian 0.00 school.GW:B1 -0.249  0.00147 0.0769
+ gaussian 0.00 school.GW:B2  0.415  0.02079 0.0842
+ gaussian 0.00 school.GW:B3 -0.101 -0.01370 0.0851
+ gaussian 0.00     sex.2:B1 -0.272 -0.01034 0.0752
+ gaussian 0.00     sex.2:B2  0.000  0.00349 0.0786
+ gaussian 0.00     sex.2:B3  0.169  0.00635 0.0875
+ gaussian 0.05   age.rev:B1  0.000  0.00521 0.2014
+ gaussian 0.05   age.rev:B2  0.813  0.01739 0.2229
+ gaussian 0.05   age.rev:B3 -0.727 -0.02650 0.2302
+ gaussian 0.05 school.GW:B1 -0.249  0.00257 0.0794
+ gaussian 0.05 school.GW:B2  0.415  0.01608 0.0849
+ gaussian 0.05 school.GW:B3 -0.101 -0.01018 0.0864
+ gaussian 0.05     sex.2:B1 -0.272 -0.00750 0.0761
+ gaussian 0.05     sex.2:B2  0.000  0.00275 0.0803
+ gaussian 0.05     sex.2:B3  0.169  0.00424 0.0901
+ gaussian 0.10   age.rev:B1  0.000  0.00931 0.2096
+ gaussian 0.10   age.rev:B2  0.813  0.01058 0.2344
+ gaussian 0.10   age.rev:B3 -0.727 -0.02393 0.2393
+ gaussian 0.10 school.GW:B1 -0.249  0.00536 0.0833
+ gaussian 0.10 school.GW:B2  0.415  0.01454 0.0872
+ gaussian 0.10 school.GW:B3 -0.101 -0.01150 0.0899
+ gaussian 0.10     sex.2:B1 -0.272 -0.00649 0.0776
+ gaussian 0.10     sex.2:B2  0.000  0.00437 0.0843
+ gaussian 0.10     sex.2:B3  0.169  0.00161 0.0941
+ gaussian 0.20   age.rev:B1  0.000  0.06750 0.2832
+ gaussian 0.20   age.rev:B2  0.813 -0.02624 0.3014
+ gaussian 0.20   age.rev:B3 -0.727 -0.04541 0.2744
+ gaussian 0.20 school.GW:B1 -0.249  0.03017 0.1073
+ gaussian 0.20 school.GW:B2  0.415  0.01737 0.1016
+ gaussian 0.20 school.GW:B3 -0.101 -0.03918 0.1189
+ gaussian 0.20     sex.2:B1 -0.272 -0.00760 0.0837
+ gaussian 0.20     sex.2:B2  0.000  0.02096 0.1098
+ gaussian 0.20     sex.2:B3  0.169 -0.01386 0.1107
+   varhet 0.00   age.rev:B1  0.000 -0.00538 0.1941
+   varhet 0.00   age.rev:B2  0.813  0.03382 0.2103
+   varhet 0.00   age.rev:B3 -0.727 -0.02196 0.2168
+   varhet 0.00 school.GW:B1 -0.249  0.03500 0.0812
+   varhet 0.00 school.GW:B2  0.415  0.02638 0.0888
+   varhet 0.00 school.GW:B3 -0.101 -0.05003 0.0974
+   varhet 0.00     sex.2:B1 -0.272  0.03813 0.0821
+   varhet 0.00     sex.2:B2  0.000 -0.00879 0.0793
+   varhet 0.00     sex.2:B3  0.169 -0.03354 0.0890
+   varhet 0.05   age.rev:B1  0.000 -0.01661 0.1969
+   varhet 0.05   age.rev:B2  0.813  0.03017 0.2147
+   varhet 0.05   age.rev:B3 -0.727 -0.00679 0.2213
+   varhet 0.05 school.GW:B1 -0.249  0.03962 0.0841
+   varhet 0.05 school.GW:B2  0.415  0.02207 0.0893
+   varhet 0.05 school.GW:B3 -0.101 -0.05043 0.0990
+   varhet 0.05     sex.2:B1 -0.272  0.04729 0.0870
+   varhet 0.05     sex.2:B2  0.000 -0.01118 0.0804
+   varhet 0.05     sex.2:B3  0.169 -0.04052 0.0930
+   varhet 0.10   age.rev:B1  0.000 -0.01690 0.1984
+   varhet 0.10   age.rev:B2  0.813  0.02260 0.2217
+   varhet 0.10   age.rev:B3 -0.727  0.00146 0.2276
+   varhet 0.10 school.GW:B1 -0.249  0.04822 0.0897
+   varhet 0.10 school.GW:B2  0.415  0.02054 0.0912
+   varhet 0.10 school.GW:B3 -0.101 -0.05752 0.1046
+   varhet 0.10     sex.2:B1 -0.272  0.05548 0.0919
+   varhet 0.10     sex.2:B2  0.000 -0.00952 0.0820
+   varhet 0.10     sex.2:B3  0.169 -0.05054 0.0996
+   varhet 0.20   age.rev:B1  0.000  0.04575 0.2070
+   varhet 0.20   age.rev:B2  0.813 -0.03655 0.2512
+   varhet 0.20   age.rev:B3 -0.727 -0.00056 0.2507
+   varhet 0.20 school.GW:B1 -0.249  0.08897 0.1180
+   varhet 0.20 school.GW:B2  0.415  0.02651 0.1004
+   varhet 0.20 school.GW:B3 -0.101 -0.10361 0.1409
+   varhet 0.20     sex.2:B1 -0.272  0.06724 0.0996
+   varhet 0.20     sex.2:B2  0.000  0.01916 0.0903
+   varhet 0.20     sex.2:B3  0.169 -0.09100 0.1300
+
+== pooled over the nine effects ==
+      err  eps max_abs_bias rmse_min rmse_max
+ gaussian 0.00       0.0379   0.0752    0.225
+ gaussian 0.05       0.0265   0.0761    0.230
+ gaussian 0.10       0.0239   0.0776    0.239
+ gaussian 0.20       0.0675   0.0837    0.301
+   varhet 0.00       0.0500   0.0793    0.217
+   varhet 0.05       0.0504   0.0804    0.221
+   varhet 0.10       0.0575   0.0820    0.228
+   varhet 0.20       0.1036   0.0903    0.251
+
+-- tab_app_sim_theta.tex
+\begin{tabular}{lrrrrr}
+\toprule
+& & \multicolumn{2}{c}{$\varepsilon=0$} & \multicolumn{2}{c}{$\varepsilon=0.2$} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+Effect & True value & Bias & RMSE & Bias & RMSE \\
+\midrule
+\texttt{age.rev} $\to$ 1 & 0.000 & 0.009 & 0.197 & 0.067 & 0.283 \\
+\texttt{age.rev} $\to$ 2 & 0.813 & 0.025 & 0.218 & -0.026 & 0.301 \\
+\texttt{age.rev} $\to$ 3 & -0.727 & -0.038 & 0.225 & -0.045 & 0.274 \\
+\texttt{school.GW} $\to$ 1 & -0.249 & 0.001 & 0.077 & 0.030 & 0.107 \\
+\texttt{school.GW} $\to$ 2 & 0.415 & 0.021 & 0.084 & 0.017 & 0.102 \\
+\texttt{school.GW} $\to$ 3 & -0.101 & -0.014 & 0.085 & -0.039 & 0.119 \\
+\texttt{sex.2} $\to$ 1 & -0.272 & -0.010 & 0.075 & -0.008 & 0.084 \\
+\texttt{sex.2} $\to$ 2 & 0.000 & 0.003 & 0.079 & 0.021 & 0.110 \\
+\texttt{sex.2} $\to$ 3 & 0.169 & 0.006 & 0.087 & -0.014 & 0.111 \\
+\bottomrule
+\end{tabular}
+DONE

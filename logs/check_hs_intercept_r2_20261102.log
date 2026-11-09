@@ -1,0 +1,11 @@
+nmfkc 1.0.3 from /home/ksa/Rlib_dev_a343c39 | R 4.6.1 | 2026-11-02 08:38:18
+  spec seed        nll degenerate converged      sigma2       tau2
+   int    1 -1199.3415      FALSE      TRUE 0.015268389 0.26169454
+ noint    1 -1022.0557      FALSE      TRUE 0.015208094 0.75083796
+   int    2 -1199.3415      FALSE      TRUE 0.015268488 0.26170554
+ noint    2 -1022.0557      FALSE      TRUE 0.015208094 0.75083798
+   int    3 -1199.3415      FALSE      TRUE 0.015268488 0.26170546
+ noint    3 -1022.0557      FALSE      TRUE 0.015208094 0.75083812
+
+best NLL: intercept -1199.3415, none -1022.0557 | 2dNLL = 354.57 (3 parameters)
+DONE 2026-11-02 08:38:29

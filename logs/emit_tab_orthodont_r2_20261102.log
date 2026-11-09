@@ -1,0 +1,7 @@
+emit_tab_orthodont_r2_20261102 | 2026-11-02 13:55:22 
+-- tab_orthodont_theta.tex
+Intercept & 90.505 & 2.472 & 2.524 & -- & -- \\
+Male      &  9.423 & 3.057 & 3.070 &  3.08 & 0.002 \\
+Orthodont basis X: 0.2308, 0.2408, 0.2567, 0.2717 | sum 1.000000
+Orthodont dfU/(NQ) 0.862
+DONE

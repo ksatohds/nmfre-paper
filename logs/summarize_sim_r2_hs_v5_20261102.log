@@ -1,0 +1,90 @@
+replicates read 2800, ok 2800 | 2026-11-02 06:35:43
+
+== fits ==
+      err  eps   n degenerate extra_starts point_est_region width_med cong_med cong_p05  sigma2   tau2 t_med t_max
+ gaussian 0.00 500          0            0            0.784   0.00000   0.9936   0.9813 0.01512 0.2654 322.9 481.1
+   varhet 0.00 200          0            0            0.795   0.00000   0.9873   0.9778 0.01288 0.2767 271.4 372.2
+ gaussian 0.05 500          0            0            0.580   0.00000   0.9928   0.9809 0.01511 0.2617 294.3 507.1
+   varhet 0.05 200          0            0            0.635   0.00000   0.9849   0.9751 0.01285 0.2731 275.8 381.0
+ gaussian 0.10 500          0            0            0.344   0.11642   0.9917   0.9783 0.01510 0.2597 316.3 669.4
+   varhet 0.10 200          0            0            0.450   0.02083   0.9819   0.9709 0.01281 0.2709 291.6 461.5
+ gaussian 0.20 500          1            1            0.070   0.51701   0.9875   0.9476 0.01508 0.2583 381.0 892.0
+   varhet 0.20 200          0            0            0.135   0.25451   0.9717   0.9571 0.01272 0.2693 273.1 523.2
+
+== intervals for the covariate effects (9 pooled; zero = the two true zeros; nonzero = the other seven) ==
+      err  eps   n cov_wild cov_prof set_wild set_prof size0_wild size0_prof power_wild power_prof rej0_inregion_wild rej0_inregion_prof len_wild len_prof prof_reached
+ gaussian 0.00 500    0.925    0.942    0.925    0.942     0.0760     0.0530      0.822      0.805                 NA                 NA    0.447    0.481            1
+   varhet 0.00 200    0.909    0.927    0.909    0.927     0.0725     0.0600      0.803      0.789                 NA                 NA    0.437    0.464            1
+ gaussian 0.05 500    0.923    0.948    0.900    0.934     0.0770     0.0470      0.810      0.771                 NA                 NA    0.454    0.510            1
+   varhet 0.05 200    0.902    0.928    0.879    0.902     0.0775     0.0650      0.794      0.760                 NA                 NA    0.441    0.481            1
+ gaussian 0.10 500    0.918    0.956    0.856    0.922     0.0860     0.0410      0.792      0.728                 NA                 NA    0.464    0.555            1
+   varhet 0.10 200    0.895    0.929    0.826    0.876     0.0750     0.0500      0.784      0.729                 NA                 NA    0.447    0.507            1
+ gaussian 0.20 500    0.876    0.966    0.666    0.906     0.1460     0.0340      0.753      0.579                 NA                 NA    0.500    0.716            1
+   varhet 0.20 200    0.843    0.911    0.634    0.803     0.0950     0.0475      0.736      0.631                 NA                 NA    0.466    0.581            1
+
+== by coefficient (coverage wild / profile; rejection of 0), e = 0 and e = 0.2 ==
+      err eps         coef target      popL      popU  snr cov_wild cov_prof rej0_wild rej0_prof
+ gaussian 0.0   age.rev:B1  0.000  2.43e-17  2.43e-17 0.00    0.920    0.948     0.080     0.052
+ gaussian 0.0     sex.2:B2  0.000 -1.39e-17 -1.39e-17 0.00    0.928    0.946     0.072     0.054
+ gaussian 0.0 school.GW:B3 -0.101 -1.01e-01 -1.01e-01 1.25    0.936    0.952     0.304     0.252
+ gaussian 0.0     sex.2:B3  0.169  1.69e-01  1.69e-01 2.15    0.918    0.930     0.600     0.566
+ gaussian 0.0   age.rev:B3 -0.727 -7.27e-01 -7.27e-01 3.49    0.936    0.940     0.954     0.946
+ gaussian 0.0 school.GW:B1 -0.249 -2.49e-01 -2.49e-01 3.51    0.940    0.966     0.930     0.914
+ gaussian 0.0     sex.2:B1 -0.272 -2.72e-01 -2.72e-01 3.93    0.930    0.944     0.982     0.982
+ gaussian 0.0   age.rev:B2  0.813  8.13e-01  8.13e-01 4.23    0.902    0.916     0.984     0.972
+ gaussian 0.0 school.GW:B2  0.415  4.15e-01  4.15e-01 5.61    0.918    0.938     1.000     1.000
+ gaussian 0.2   age.rev:B1  0.000 -1.08e-01  3.67e-01 0.00    0.846    0.964     0.154     0.036
+ gaussian 0.2     sex.2:B2  0.000 -3.12e-02  1.01e-01 0.00    0.862    0.968     0.138     0.032
+ gaussian 0.2 school.GW:B3 -0.101 -2.47e-01 -5.34e-02 1.10    0.868    0.980     0.370     0.154
+ gaussian 0.2     sex.2:B3  0.169  8.70e-02  1.87e-01 1.88    0.876    0.966     0.414     0.200
+ gaussian 0.2   age.rev:B3 -0.727 -8.53e-01 -6.64e-01 3.05    0.922    0.958     0.868     0.834
+ gaussian 0.2 school.GW:B1 -0.249 -2.83e-01 -1.03e-01 3.24    0.840    0.970     0.756     0.232
+ gaussian 0.2     sex.2:B1 -0.272 -2.91e-01 -2.58e-01 3.62    0.922    0.968     0.946     0.908
+ gaussian 0.2   age.rev:B2  0.813  5.72e-01  8.58e-01 3.76    0.844    0.954     0.920     0.740
+ gaussian 0.2 school.GW:B2  0.415  4.02e-01  4.25e-01 4.99    0.900    0.966     0.994     0.988
+   varhet 0.0   age.rev:B1  0.000  2.43e-17  2.43e-17 0.00    0.920    0.940     0.080     0.060
+   varhet 0.0     sex.2:B2  0.000 -1.39e-17 -1.39e-17 0.00    0.935    0.940     0.065     0.060
+   varhet 0.0 school.GW:B3 -0.101 -1.01e-01 -1.01e-01 1.29    0.880    0.920     0.465     0.425
+   varhet 0.0     sex.2:B3  0.169  1.69e-01  1.69e-01 2.22    0.925    0.935     0.405     0.385
+   varhet 0.0   age.rev:B3 -0.727 -7.27e-01 -7.27e-01 3.60    0.925    0.935     0.960     0.960
+   varhet 0.0 school.GW:B1 -0.249 -2.49e-01 -2.49e-01 3.63    0.895    0.910     0.870     0.840
+   varhet 0.0     sex.2:B1 -0.272 -2.72e-01 -2.72e-01 4.04    0.900    0.915     0.930     0.925
+   varhet 0.0   age.rev:B2  0.813  8.13e-01  8.13e-01 4.24    0.915    0.935     0.990     0.990
+   varhet 0.0 school.GW:B2  0.415  4.15e-01  4.15e-01 5.64    0.890    0.915     1.000     1.000
+   varhet 0.2   age.rev:B1  0.000 -1.08e-01  3.67e-01 0.00    0.920    0.970     0.080     0.030
+   varhet 0.2     sex.2:B2  0.000 -3.12e-02  1.01e-01 0.00    0.890    0.935     0.110     0.065
+   varhet 0.2 school.GW:B3 -0.101 -2.47e-01 -5.34e-02 1.19    0.745    0.865     0.655     0.470
+   varhet 0.2     sex.2:B3  0.169  8.70e-02  1.87e-01 2.03    0.775    0.845     0.195     0.105
+   varhet 0.2   age.rev:B3 -0.727 -8.53e-01 -6.64e-01 3.31    0.915    0.950     0.900     0.875
+   varhet 0.2 school.GW:B1 -0.249 -2.83e-01 -1.03e-01 3.56    0.735    0.870     0.605     0.280
+   varhet 0.2   age.rev:B2  0.813  5.72e-01  8.58e-01 3.90    0.900    0.950     0.940     0.890
+   varhet 0.2     sex.2:B1 -0.272 -2.91e-01 -2.58e-01 3.98    0.820    0.865     0.855     0.800
+   varhet 0.2 school.GW:B2  0.415  4.02e-01  4.25e-01 5.16    0.885    0.950     1.000     1.000
+
+== Xi = X Theta (covariate columns): NMF-RE (C1 Wald) vs ESEM ==
+      err  eps rmse_nmfre cov_nmfre rmse_esem cov_esem esem_ok heywood
+ gaussian 0.00    0.03049    0.9301   0.03130   0.9407    1.00   0.066
+   varhet 0.00    0.03189    0.9146   0.03146   0.9394    1.00   0.000
+ gaussian 0.05    0.02991    0.9289   0.03077   0.9414    1.00   0.078
+   varhet 0.05    0.03139    0.9122   0.03097   0.9387    1.00   0.000
+ gaussian 0.10    0.02938    0.9281   0.03031   0.9403    1.00   0.088
+   varhet 0.10    0.03094    0.9094   0.03059   0.9365    1.00   0.005
+ gaussian 0.20    0.02846    0.9233   0.02968   0.9364    0.99   0.120
+   varhet 0.20    0.03024    0.9035   0.03010   0.9331    1.00   0.045
+
+== covariate-level Wald tests (all three covariates are non-null): rejection at 0.05 ==
+      err  eps intercept age.rev sex.2 school.GW
+ gaussian 0.00         1   0.994 0.978         1
+   varhet 0.00         1   0.995 0.910         1
+ gaussian 0.05         1   0.992 0.972         1
+   varhet 0.05         1   0.995 0.890         1
+ gaussian 0.10         1   0.986 0.964         1
+   varhet 0.10         1   0.995 0.840         1
+ gaussian 0.20         1   0.972 0.936         1
+   varhet 0.20         1   0.975 0.765         1
+
+== known-anchor arm (e = 0, Gaussian) ==
+n 500 | cost (marginal NLL, anchored - free): median 0.093, 90th 1.316, max 4.890 | degenerate 0 | width 0 in 500 | cong min median 0.9938
+wild coverage 0.926 | size at the zeros 0.073 | power (non-zero) 0.817 | time median 37 s
+
+DONE 2026-11-02 06:35:46

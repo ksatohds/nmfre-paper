@@ -1,0 +1,23 @@
+nmfkc 1.0.3 from /home/ksa/Rlib_dev_a343c39 | lavaan 0.7.2 | R 4.6.1 | cores 90 | OPENBLAS_NUM_THREADS 1 | 2026-11-01 21:31:02
+Theta0 (canonical):
+       intercept age.rev   sex.2 school.GW
+Basis1    1.2159  0.0000 -0.2719   -0.2493
+Basis2    0.1100  0.8132  0.0000    0.4153
+Basis3    2.7059 -0.7269  0.1692   -0.1009
+variance weights w_p: 0.73 1.36 2.44 0.60 0.72 0.65 1.03 0.62 0.85 
+eps 0.00: region arc 0.00 deg | width (covariates) max 0.0000 | geomin again moves 0.0e+00 | min congruence X_g vs X* 1.0000 | zeros in region: age.rev:B1 [0.000, 0.000]; sex.2:B2 [-0.000, -0.000]
+eps 0.05: region arc 5.44 deg | width (covariates) max 0.0844 | geomin again moves 1.7e-09 | min congruence X_g vs X* 0.9990 | zeros in region: age.rev:B1 [-0.046, 0.038]; sex.2:B2 [-0.013, 0.011]
+eps 0.10: region arc 12.06 deg | width (covariates) max 0.1869 | geomin again moves 7.2e-09 | min congruence X_g vs X* 0.9961 | zeros in region: age.rev:B1 [-0.085, 0.102]; sex.2:B2 [-0.025, 0.029]
+eps 0.20: region arc 31.17 deg | width (covariates) max 0.4747 | geomin again moves 1.6e-08 | min congruence X_g vs X* 0.9805 | zeros in region: age.rev:B1 [-0.108, 0.367]; sex.2:B2 [-0.031, 0.101]
+1856 replicates to run (0 already done) | 2026-11-01 21:31:02
+wall 7295 s | 2026-11-01 23:32:38
+gaussian eps 0.00: 330 ok of 330 | degenerate 0 | cov wild 0.924 prof 0.939 | zeros: size wild 0.080 prof 0.061 | time 339 s
+gaussian eps 0.05: 330 ok of 330 | degenerate 0 | cov wild 0.921 prof 0.946 | zeros: size wild 0.082 prof 0.053 | time 321 s
+gaussian eps 0.10: 330 ok of 330 | degenerate 0 | cov wild 0.914 prof 0.955 | zeros: size wild 0.091 prof 0.047 | time 355 s
+gaussian eps 0.20: 330 ok of 330 | degenerate 1 | cov wild 0.870 prof 0.965 | zeros: size wild 0.159 prof 0.036 | time 453 s
+varhet eps 0.00: 134 ok of 134 | degenerate 0 | cov wild 0.902 prof 0.925 | zeros: size wild 0.086 prof 0.063 | time 285 s
+varhet eps 0.05: 134 ok of 134 | degenerate 0 | cov wild 0.893 prof 0.925 | zeros: size wild 0.093 prof 0.078 | time 294 s
+varhet eps 0.10: 134 ok of 134 | degenerate 0 | cov wild 0.888 prof 0.927 | zeros: size wild 0.090 prof 0.056 | time 309 s
+varhet eps 0.20: 134 ok of 134 | degenerate 0 | cov wild 0.843 prof 0.910 | zeros: size wild 0.097 prof 0.049 | time 310 s
+
+DONE

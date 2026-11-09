@@ -1,0 +1,15 @@
+lavaan 0.6.20 | P 9, N 300, covariates 3 | NMF-RE NLL -1199.3377 | 2026-10-31 21:59:10
+
+variant      conv  heywood  logLik   2*dLL(vs free)  df   cor(Xi, NMF-RE)  max|diff|
+esem         TRUE  FALSE    1299.67           0.00    0            0.971      0.056
+eqvar        TRUE  FALSE    1262.39          74.55    8            0.974      0.066
+span         TRUE  FALSE    1262.72          73.90    6            0.920      0.088
+eqvar_span   TRUE  FALSE    1200.42         198.49   14            1.000      0.005
+NMF-RE       logLik 1199.34; 2*dLL vs free ESEM 200.66; vs eqvar_span (cost of non-negativity) 2.16
+
+unique variances (free ESEM):
+    x1     x2     x3     x4     x5     x6     x7     x8     x9 
+0.0121 0.0217 0.0307 0.0096 0.0109 0.0102 0.0151 0.0105 0.0139 
+NMF-RE sigma2 0.0153
+
+DONE 2026-10-31 21:59:12

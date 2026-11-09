@@ -1,0 +1,57 @@
+Warning messages:
+1: package 'DiagrammeR' was built under R version 4.4.3 
+2: package 'DiagrammeRsvg' was built under R version 4.4.3 
+3: package 'rsvg' was built under R version 4.4.3 
+HS fit: NLL -1199.3415 | identification region max width 0 | sigma2 0.01527 tau2 0.2617 lambda 0.0583 dfU 642.62 r 0.714
+dominant component per test: x1=1 x2=1 x3=1 x4=2 x5=2 x6=2 x7=3 x8=3 x9=3 
+
+%% tab:hs1939_basis (body)
+$x_1$ & Visual perception       & \textbf{0.158} & 0.103 & 0.126 \\
+$x_2$ & Cubes                   & \textbf{0.173} & 0.084 & 0.126 \\
+$x_3$ & Lozenges                & \textbf{0.413} & 0.010 & 0.014 \\
+$x_4$ & Paragraph comprehension & 0.054 & \textbf{0.244} & 0.098 \\
+$x_5$ & Sentence completion     & 0.038 & \textbf{0.308} & 0.114 \\
+$x_6$ & Word meaning            & 0.053 & \textbf{0.225} & 0.045 \\
+$x_7$ & Speeded addition        & 0.000 & 0.000 & \textbf{0.205} \\
+$x_8$ & Speeded counting        & 0.029 & 0.000 & \textbf{0.143} \\
+$x_9$ & Speeded discrimination  & 0.082 & 0.027 & \textbf{0.129} \\
+exact zeros in X: 7 16 17
+   Factor1 Factor2 Factor3
+x1  0.1579  0.1030  0.1262
+x2  0.1731  0.0840  0.1260
+x3  0.4130  0.0099  0.0143
+x4  0.0543  0.2440  0.0978
+x5  0.0379  0.3079  0.1138
+x6  0.0535  0.2247  0.0447
+x7  0.0000  0.0000  0.2052
+x8  0.0287  0.0000  0.1427
+x9  0.0816  0.0265  0.1292
+
+%% tab:hs1939_theta (body)
+age.rev   & Factor1 &  0.144 & 0.183 & 0.184 &  0.79 & 0.431 \\
+age.rev   & Factor2 &  0.811 & 0.177 & 0.179 &  4.59 & $<0.001$ \\
+age.rev   & Factor3 & -0.726 & 0.190 & 0.189 & -3.81 & $<0.001$ \\
+sex.2     & Factor1 & -0.271 & 0.070 & 0.071 & -3.86 & $<0.001$ \\
+sex.2     & Factor2 &  0.050 & 0.072 & 0.075 &  0.70 & 0.487 \\
+sex.2     & Factor3 &  0.169 & 0.076 & 0.078 &  2.21 & 0.0270 \\
+school.GW & Factor1 & -0.248 & 0.069 & 0.070 & -3.59 & $<0.001$ \\
+school.GW & Factor2 &  0.414 & 0.072 & 0.072 &  5.72 & $<0.001$ \\
+school.GW & Factor3 & -0.101 & 0.078 & 0.078 & -1.30 & 0.195 \\
+
+intercepts (estimates only, A24): Factor1 1.219, Factor2 0.116, Factor3 2.697 
+
+intervals (wild-bootstrap percentile; profile likelihood):
+              coef     est wild_lo wild_hi prof_lo prof_hi
+   age.rev Factor1  0.1444 -0.1999  0.4906 -0.2345  0.5256
+   age.rev Factor2  0.8106  0.4618  1.1638  0.4296  1.2057
+   age.rev Factor3 -0.7256 -1.0765 -0.3516 -1.1381 -0.3259
+     sex.2 Factor1 -0.2711 -0.4059 -0.1301 -0.4136 -0.1337
+     sex.2 Factor2  0.0504 -0.0997  0.1944 -0.0962  0.1959
+     sex.2 Factor3  0.1687  0.0155  0.3214  0.0133  0.3283
+ school.GW Factor1 -0.2481 -0.3842 -0.1173 -0.3981 -0.1034
+ school.GW Factor2  0.4143  0.2634  0.5607  0.2654  0.5708
+ school.GW Factor3 -0.1011 -0.2498  0.0533 -0.2640  0.0604
+
+Figure 2: 9 A->X edges (|Theta| >= 0.05), 4 negative (dashed); 18 X->Y edges
+WROTE Figure2_r2_20261102.pdf/.png
+DONE 2026-11-02 08:36:31

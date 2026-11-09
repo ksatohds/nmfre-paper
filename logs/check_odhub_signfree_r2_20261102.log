@@ -1,0 +1,97 @@
+nmfkc 1.0.3 from /home/ksa/Rlib_dev_a343c39 | R 4.6.1 | cores 10 | OPENBLAS_NUM_THREADS 1 | 2026-11-02 07:29:24
+seed 1: NLL 4224.7910 | degenerate TRUE | converged FALSE iter 8347 | 203 s | starts:
+  start seed      nll degenerate converged chosen
+ kmeans    1 4224.791       TRUE     FALSE  FALSE
+    spa    1 4224.791       TRUE     FALSE  FALSE
+ kmeans    2 4224.791       TRUE     FALSE  FALSE
+ kmeans    3 4224.791       TRUE     FALSE  FALSE
+ kmeans    4 4224.791       TRUE     FALSE  FALSE
+ kmeans    5 4224.791       TRUE     FALSE  FALSE
+ kmeans    6 4224.791       TRUE     FALSE  FALSE
+ kmeans    7 4224.791       TRUE     FALSE  FALSE
+ kmeans    8 4224.791       TRUE     FALSE  FALSE
+ kmeans    9 4224.791       TRUE     FALSE  FALSE
+ kmeans   10 4224.791       TRUE     FALSE  FALSE
+ kmeans   11 4224.791       TRUE     FALSE  FALSE
+ kmeans   12 4224.791       TRUE     FALSE  FALSE
+ kmeans   13 4224.791       TRUE     FALSE  FALSE
+ kmeans   14 4224.791       TRUE     FALSE  FALSE
+ kmeans   15 4224.791       TRUE     FALSE  FALSE
+ kmeans   16 4224.791       TRUE     FALSE  FALSE
+ kmeans   17 4224.791       TRUE     FALSE  FALSE
+ kmeans   18 4224.791       TRUE     FALSE  FALSE
+ kmeans   19 4224.791       TRUE     FALSE   TRUE
+ kmeans   20 4224.791       TRUE     FALSE  FALSE
+ kmeans   21 4224.791       TRUE     FALSE  FALSE
+seed 2: NLL 4224.7910 | degenerate TRUE | converged FALSE iter 8347 | 202 s | starts:
+  start seed      nll degenerate converged chosen
+ kmeans    2 4224.791       TRUE     FALSE  FALSE
+    spa    2 4224.791       TRUE     FALSE  FALSE
+ kmeans    3 4224.791       TRUE     FALSE  FALSE
+ kmeans    4 4224.791       TRUE     FALSE  FALSE
+ kmeans    5 4224.791       TRUE     FALSE  FALSE
+ kmeans    6 4224.791       TRUE     FALSE  FALSE
+ kmeans    7 4224.791       TRUE     FALSE  FALSE
+ kmeans    8 4224.791       TRUE     FALSE  FALSE
+ kmeans    9 4224.791       TRUE     FALSE  FALSE
+ kmeans   10 4224.791       TRUE     FALSE  FALSE
+ kmeans   11 4224.791       TRUE     FALSE  FALSE
+ kmeans   12 4224.791       TRUE     FALSE  FALSE
+ kmeans   13 4224.791       TRUE     FALSE  FALSE
+ kmeans   14 4224.791       TRUE     FALSE  FALSE
+ kmeans   15 4224.791       TRUE     FALSE  FALSE
+ kmeans   16 4224.791       TRUE     FALSE  FALSE
+ kmeans   17 4224.791       TRUE     FALSE  FALSE
+ kmeans   18 4224.791       TRUE     FALSE  FALSE
+ kmeans   19 4224.791       TRUE     FALSE   TRUE
+ kmeans   20 4224.791       TRUE     FALSE  FALSE
+ kmeans   21 4224.791       TRUE     FALSE  FALSE
+ kmeans   22 4224.791       TRUE     FALSE  FALSE
+seed 3: NLL 4224.7910 | degenerate TRUE | converged FALSE iter 8347 | 202 s | starts:
+  start seed      nll degenerate converged chosen
+ kmeans    3 4224.791       TRUE     FALSE  FALSE
+    spa    3 4224.791       TRUE     FALSE  FALSE
+ kmeans    4 4224.791       TRUE     FALSE  FALSE
+ kmeans    5 4224.791       TRUE     FALSE  FALSE
+ kmeans    6 4224.791       TRUE     FALSE  FALSE
+ kmeans    7 4224.791       TRUE     FALSE  FALSE
+ kmeans    8 4224.791       TRUE     FALSE  FALSE
+ kmeans    9 4224.791       TRUE     FALSE  FALSE
+ kmeans   10 4224.791       TRUE     FALSE  FALSE
+ kmeans   11 4224.791       TRUE     FALSE  FALSE
+ kmeans   12 4224.791       TRUE     FALSE  FALSE
+ kmeans   13 4224.791       TRUE     FALSE  FALSE
+ kmeans   14 4224.791       TRUE     FALSE  FALSE
+ kmeans   15 4224.791       TRUE     FALSE  FALSE
+ kmeans   16 4224.791       TRUE     FALSE  FALSE
+ kmeans   17 4224.791       TRUE     FALSE  FALSE
+ kmeans   18 4224.791       TRUE     FALSE  FALSE
+ kmeans   19 4224.791       TRUE     FALSE   TRUE
+ kmeans   20 4224.791       TRUE     FALSE  FALSE
+ kmeans   21 4224.791       TRUE     FALSE  FALSE
+ kmeans   22 4224.791       TRUE     FALSE  FALSE
+ kmeans   23 4224.791       TRUE     FALSE  FALSE
+
+best: NLL 4224.7910 | sigma2 3.2904 tau2 134.27 lambda 0.02451 dfU/(NQ) 0.460 | max cosine of X columns 1.000 | identification region max width 0
+X (share of each prefecture by component), rows with share > 0.99 per column:
+  Basis1: 
+  Basis2: 宮崎県 鹿児島県
+  Basis3: 奈良県 鳥取県 徳島県 愛媛県 高知県
+
+coefficients (C1 = wild-bootstrap percentile interval; Wald = estimate +- 1.96 SE; profile likelihood):
+  Basis Covariate Estimate       SE      BSE  z_value   p_value    CI_low  CI_high   prof_lo  prof_hi prof_reached prof_time   wald_lo  wald_hi
+ Basis1 intercept -417.348 186.3141 181.5186  -2.2400 2.509e-02 -759.6603  -46.375        NA       NA           NA        NA -782.5166  -52.179
+ Basis2 intercept  446.654 186.2970 181.4813   2.3975 1.651e-02   75.6248  792.960        NA       NA           NA        NA   81.5189  811.790
+ Basis3 intercept    1.876   5.4153   5.2218   0.3465 7.290e-01   -7.1649   13.948        NA       NA           NA        NA   -8.7373   12.490
+ Basis1    東京都   79.034  24.3006  24.5390   3.2523 1.145e-03   26.6003  121.524   78.7615   79.312         TRUE     92.02   31.4057  126.662
+ Basis2    東京都  -68.914  23.7588  24.0041  -2.9006 3.725e-03 -110.3789  -18.072  -69.1953  -60.054         TRUE    246.82 -115.4807  -22.348
+ Basis3    東京都   -2.516   0.5545   0.5440  -4.5368 5.712e-06   -3.6064   -1.477   -3.5080   -1.430         TRUE    221.44   -3.6027   -1.429
+ Basis1    大阪府  124.489  31.6546  30.5285   3.9327 8.399e-05   58.2335  178.957  124.2445  124.714         TRUE     73.15   62.4470  186.531
+ Basis2    大阪府 -130.018  32.3785  31.2563  -4.0156 5.930e-05 -185.1535  -61.516 -130.2599 -129.795         TRUE     79.08 -193.4786  -66.557
+ Basis3    大阪府   12.786   1.1518   1.1586  11.1009 0.000e+00   10.0300   14.446   11.7715   13.831         TRUE    153.06   10.5288   15.044
+ Basis1    福岡県 -557.386  39.9555  39.4620 -13.9502 0.000e+00 -622.4907 -461.629 -557.6966 -557.075         TRUE     88.98 -635.6974 -479.075
+ Basis2    福岡県  557.578  39.6279  39.1273  14.0703 0.000e+00  462.9945  623.035  557.2642  557.890         TRUE     85.13  479.9091  635.248
+ Basis3    福岡県    1.822   0.6779   0.6581   2.6879 7.191e-03    0.3706    2.991    0.2291    3.433         TRUE    110.94    0.4934    3.151
+
+total 450 s
+DONE 2026-11-02 07:36:55

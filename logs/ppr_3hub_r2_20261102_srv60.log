@@ -1,0 +1,76 @@
+ppr_3hub_r2_20261102 | R version 4.6.1 (2026-06-24) | 2026-11-02 15:03:05 
+
+== Part 1: four hubs (Tokyo, Aichi, Osaka, Fukuoka), nterms 4, max.terms 10 (the R1 report) ==
+N 47 P 43 K 4 | overall R^2 0.613498606 (R1 report: 0.500079568)
+
+== Part 2: three hubs (Tokyo, Osaka, Fukuoka), nterms 3, max.terms 8 (the paper's OD-HUB specification) ==
+N 47 P 44 K 3 | overall R^2 0.501332651 | R^2 rounded 0.501
+projection directions alpha (rows = hubs, columns = terms):
+        term 1 term 2 term 3
+Tokyo   -0.148  0.843  0.412
+Osaka    0.921  0.442  0.904
+Fukuoka  0.362 -0.305  0.112
+largest |alpha| per term: Osaka Tokyo Osaka 
+
+summary of the three-hub fit:
+Call:
+ppr(x = X, y = Yresp, nterms = nterms, max.terms = max.terms, 
+    sm.method = "supsmu")
+
+Goodness of fit:
+ 3 terms  4 terms  5 terms  6 terms  7 terms  8 terms 
+7218.991 5889.163 5242.712 4226.731 3886.018 3454.605 
+
+Projection direction vectors ('alpha'):
+        term 1     term 2     term 3    
+Tokyo   -0.1477901  0.8433765  0.4119961
+Osaka    0.9205380  0.4423999  0.9042800
+Fukuoka  0.3616184 -0.3049565  0.1119682
+
+Coefficients of ridge terms ('beta'):
+          term 1      term 2      term 3     
+Hokkaido   0.51309416  0.87289730 -1.75703177
+Aomori    -3.19578568 -1.90981532  2.98299304
+Iwate     -3.59180352 -1.81287026  2.95099623
+Miyagi    -4.11658738 -1.55814853  3.56046296
+Akita     -3.50096473 -2.35210327  3.33368463
+Yamagata  -3.49744329 -1.60668063  3.08053000
+Fukushima -2.97197483 -0.05260858  2.15751114
+Ibaraki   -2.12120306  1.29842213  1.10153536
+Tochigi   -2.20606914  1.26302724  1.25461492
+Gunma     -1.14642566  2.11983100 -0.15107010
+Saitama   -1.84822707  1.95164224  0.71080524
+Chiba     -2.00025366  1.22852320  1.58188956
+Kanagawa  -1.72465668  1.46611084  1.36883425
+Niigata   -1.30803647  1.24195560  0.30387178
+Toyama     1.42642443  2.37240345 -1.75715112
+Ishikawa   1.86637909  2.31031862 -1.97921893
+Fukui      2.15760153  2.24496636 -1.68171676
+Yamanashi -0.44922902  2.03299619 -0.25118666
+Nagano     0.51433374  2.70969120 -1.07131583
+Gifu       2.37843798  2.78042679 -2.03834548
+Shizuoka   0.40927664  2.32015849 -0.56119266
+Aichi      2.19258775  3.04402330 -1.75782704
+Mie        2.20392906  2.54161896 -1.35203683
+Shiga      1.96489586  1.91300623 -0.75373598
+Kyoto      1.96380958  1.52147951 -0.16992080
+Hyogo      1.10073976 -0.12599351  1.50946009
+Nara       1.63705818  0.92453365  0.30653541
+Wakayama   1.04090808  0.50571634  0.68185228
+Tottori    0.08489131 -1.14877944  1.54540957
+Shimane    0.16825413 -1.59339376  1.36339460
+Okayama    0.76195108 -0.83297332  1.20097801
+Hiroshima  0.79700161 -1.47351023  1.26725601
+Yamaguchi  0.48473288 -1.97415129  1.27865063
+Tokushima  0.77680822 -0.38664754  0.46153927
+Kagawa     0.96985700 -0.35994819  0.28534533
+Ehime      1.30365595 -0.41212420 -0.06008801
+Kochi      0.78378001 -0.28658621  0.09626437
+Saga       0.47593367 -1.85836540  0.81314489
+Nagasaki   0.30596624 -1.39739113  0.49596341
+Kumamoto   0.22761072 -2.20020291  1.26725133
+Oita       0.10723677 -1.78508604  0.73803003
+Miyazaki   0.67542548 -1.20759951  0.02733365
+Kagoshima  0.59867543 -1.21417805  0.18486614
+Okinawa    0.51105107  0.67517149 -1.54734016
+DONE

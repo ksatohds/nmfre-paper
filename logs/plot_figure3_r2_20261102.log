@@ -1,0 +1,11 @@
+       東京都 大阪府 福岡県
+Basis1 10.577  0.000  0.000
+Basis2  0.000 10.509  0.000
+Basis3  0.000  0.000  7.065
+警告メッセージ:
+CPL_read_ogr(dsn, layer, query, as.character(options), quiet,  で:
+  GDAL Message 1: /home/ksa/R/x86_64-pc-linux-gnu-library/4.6/NipponMap/shapes/jpn.shp contains polygon(s) with rings with invalid winding order. Autocorrecting them, but that shapefile should be corrected using ogr2ogr for example.
+null device 
+          1 
+regions: Hokkaido=1 Aomori=1 Iwate=1 Miyagi=1 Akita=1 Yamagata=1 Fukushima=1 Ibaraki=1 Tochigi=1 Gunma=1 Saitama=1 Chiba=1 Tokyo=1 Kanagawa=1 Niigata=1 Toyama=2 Ishikawa=2 Fukui=2 Yamanashi=1 Nagano=1 Gifu=2 Shizuoka=1 Aichi=2 Mie=2 Shiga=2 Kyoto=2 Osaka=2 Hyogo=2 Nara=2 Wakayama=2 Tottori=2 Shimane=2 Okayama=2 Hiroshima=2 Yamaguchi=3 Tokushima=2 Kagawa=2 Ehime=2 Kochi=2 Fukuoka=3 Saga=3 Nagasaki=3 Kumamoto=3 Oita=3 Miyazaki=3 Kagoshima=3 Okinawa=1 
+WROTE Figure3_r2_20261102.pdf

@@ -1,0 +1,15 @@
+check_global_arcs_r2_20261102 | 2026-11-02 17:45:26 
+                case n_arcs arcs_up_to_relabeling symmetric local_arc_deg
+              hs_fit      3                     1      TRUE          0.05
+ population_eps_0.00      3                     1      TRUE          0.05
+ population_eps_0.05      3                     1      TRUE          5.45
+ population_eps_0.10      3                     1      TRUE         12.05
+ population_eps_0.20      3                     1      TRUE         31.15
+ feasible_deg geomin_local geomin_global same_minimum
+         0.15     0.742153      0.742153         TRUE
+         0.15     0.743576      0.743576         TRUE
+        16.35     0.766406      0.766406         TRUE
+        36.15     0.796254      0.796254         TRUE
+        93.45     0.864816      0.864816         TRUE
+feasible set a single arc up to relabeling in 5 of 5 cases; local geomin = global geomin in 5 of 5
+DONE

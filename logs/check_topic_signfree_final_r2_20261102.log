@@ -1,0 +1,26 @@
+nmfkc 1.0.3 from /home/ksa/Rlib_dev_55ba7c9 | R 4.6.1 | 2026-11-02 11:50:21
+Y 67 x 59 | A rows: pre1865, y1865_45, after1945
+non-negative: NLL by seed 9882.4675 9882.4675 9882.4675 | degenerate FALSE FALSE FALSE
+sign-free: NLL by seed 9879.6201 9879.6201 9879.6201 | degenerate FALSE FALSE FALSE
+
+2 x (NLL non-negative - NLL sign-free) = 5.695
+congruence of X columns (non-negative component -> sign-free component): 1->1 0.999, 2->2 0.983, 3->3 1.000 
+
+era effects, non-negative variant:
+       pre1865 y1865_45 after1945
+Topic1   87.78   156.57      0.00
+Topic2   21.31    70.79    240.88
+Topic3  124.07     0.00      0.00
+era effects, sign-free (components matched):
+       pre1865 y1865_45 after1945
+Topic1   84.33   150.63    -74.02
+Topic2   31.94    97.95    319.79
+Topic3  116.93   -25.67    -37.38
+max |X_nn - X_sf| (matched) 0.0092 | max |Xi_nn - Xi_sf| 1.972
+identification width: non-negative 0, sign-free 0
+zeros in the non-negative C: 3 (entries 6,7,9)
+
+non-negative fit: document scores B = C A + U: negative entries 43 of 177 (documents with any: 36 of 59), min -102.54
+variances: non-negative sigma2 7.79 tau2 5746.4 | sign-free sigma2 7.799 tau2 6697.5
+
+saved check_topic_signfree_final_r2_20261102.rds | 2026-11-02 11:50:25

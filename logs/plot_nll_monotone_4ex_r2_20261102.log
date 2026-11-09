@@ -1,0 +1,10 @@
+plot_nll_monotone_4ex_r2_20261102 | 2026-11-02 17:01:47 
+              hs topic orthodont odhub
+inner_steps 4863   928        12   590
+outer_steps   37    44        10    33
+inc_inner      0     0         0     0
+inc_outer      0     0         0     0
+fixed_inc      0     0         0     0
+four examples: 6517 iterations in all (inner 6393 + outer 124), increases of the marginal NLL 0
+WROTE Figure_nll_monotone_4ex_r2_20261102.pdf/.png
+DONE

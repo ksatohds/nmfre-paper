@@ -1,0 +1,12 @@
+file out_hs_v5/gaussian_eps_0.20/rep_0158.rds | 2026-11-02 12:49:49 
+design gaussian eps 0.20 rep 158 | degenerate TRUE | starts: default (k-means) degenerate TRUE, spa degenerate TRUE, extra k-means starts 20
+starts recorded 22 | marginal NLL of the starts: min -1312.5685 max -1312.5685 range 3.25e-08 | kept fit NLL -1312.5685
+  default       spa  default2  default3  default4  default5  default6  default7 
+-1312.569 -1312.569 -1312.569 -1312.569 -1312.569 -1312.569 -1312.569 -1312.569 
+ default8  default9 default10 default11 default12 default13 default14 default15 
+-1312.569 -1312.569 -1312.569 -1312.569 -1312.569 -1312.569 -1312.569 -1312.569 
+default16 default17 default18 default19 default20 default21 
+-1312.569 -1312.569 -1312.569 -1312.569 -1312.569 -1312.569 
+truth-started fit (C75): NLL -1312.5685 | 2*(NLL_v5 - NLL_truthstart) = -1.05e-08 | NLL at the true parameters -1293.9145
+smallest congruence with the population basis 0.969 | estimated region width 2.088
+DONE

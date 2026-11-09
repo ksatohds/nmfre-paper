@@ -1,0 +1,13 @@
+plot_nll_monotone_4ex_r2_20261109 | 2026-11-09 10:48:42 
+              hs topic orthodont odhub
+evaluations 4901   973        23   624
+inner_steps 4863   928        12   590
+outer_steps   37    44        10    33
+iterations  4900   972        22   623
+ticks         37    44        10    33
+inc_inner      0     0         0     0
+inc_outer      0     0         0     0
+four examples: 6517 iterations in all (inner 6393 + outer 124), increases of the marginal NLL 0
+panel labels (iterations): hs 4900, topic 972, orthodont 22, odhub 623 
+WROTE Figure_nll_monotone_4ex_r2_20261109.pdf/.png
+DONE

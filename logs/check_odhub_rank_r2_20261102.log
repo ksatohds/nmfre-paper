@@ -1,0 +1,121 @@
+nmfkc 1.0.3 from /home/ksa/Rlib_dev_a343c39 | R 4.6.1 | cores 20 | 2026-11-02 08:59:55
+
+==== h3_Q2: 3 hubs (Tokyo, Osaka, Fukuoka), Q = 2, P = 44 ====
+NLL by seed 4498.296 4498.296 4498.296 | degenerate FALSE FALSE FALSE | sigma2 4.2709 tau2 280.34 lambda 0.01523 dfU/(NQ) 0.730
+X: exact zeros 25 of 88 | anchor rows (share > 0.999): comp1: Hokkaido/Aomori/Iwate/Miyagi/Akita/Yamagata/Fukushima/Tochigi; comp2: Nara/Tottori/Shimane/Okayama/Hiroshima/Yamaguchi/Tokushima/Kagawa/Ehime/Kochi/Saga/Nagasaki/Kumamoto/Oita/Miyazaki/Kagoshima/Okinawa
+Theta (rows = components, columns = hubs):
+        Tokyo  Osaka Fukuoka
+Basis1 11.032  0.000    0.00
+Basis2  0.000 11.151    2.97
+  Basis Covariate Estimate     SE   p_value
+ Basis1    東京都    11.03 0.9284 7.274e-33
+ Basis2    東京都     0.00 0.7448 5.000e-01
+ Basis1    大阪府     0.00 0.7180 5.000e-01
+ Basis2    大阪府    11.15 0.7807 1.404e-46
+ Basis1    福岡県     0.00 0.7363 5.000e-01
+ Basis2    福岡県     2.97 0.4806 3.225e-10
+dominant component of each destination:
+dom
+ 1  2 
+20 27 
+Hokkaido=1 Aomori=1 Iwate=1 Miyagi=1 Akita=1 Yamagata=1 Fukushima=1 Ibaraki=1 Tochigi=1 Gunma=1 Saitama=1 Chiba=1 Tokyo=1 Kanagawa=1 Niigata=1 Toyama=2 Ishikawa=2 Fukui=2 Yamanashi=1 Nagano=1 Gifu=2 Shizuoka=1 Aichi=2 Mie=2 Shiga=2 Kyoto=2 Osaka=2 Hyogo=2 Nara=2 Wakayama=2 Tottori=2 Shimane=2 Okayama=2 Hiroshima=2 Yamaguchi=2 Tokushima=2 Kagawa=2 Ehime=2 Kochi=2 Fukuoka=2 Saga=2 Nagasaki=1 Kumamoto=2 Oita=2 Miyazaki=2 Kagoshima=2 Okinawa=1 
+identification: package width 0 | family dimension 0 | local feasible (of 20000 at 1e-4/1e-3/1e-2): NA | global feasible non-permutation O: 0 of 100000
+
+==== h3_Q3: 3 hubs (Tokyo, Osaka, Fukuoka), Q = 3, P = 44 ====
+NLL by seed 4266.319 4266.319 4266.319 | degenerate FALSE FALSE FALSE | sigma2 3.2642 tau2 235.82 lambda 0.01384 dfU/(NQ) 0.778
+X: exact zeros 40 of 132 | anchor rows (share > 0.999): comp1: Yamagata; comp2: Nara/Wakayama; comp3: Miyazaki/Kagoshima/Okinawa
+Theta (rows = components, columns = hubs):
+        Tokyo  Osaka Fukuoka
+Basis1 10.577  0.000   0.000
+Basis2  0.000 10.509   0.000
+Basis3  0.000  0.000   7.065
+  Basis Covariate Estimate     SE   p_value
+ Basis1    東京都   10.577 0.8924 1.048e-32
+ Basis2    東京都    0.000 0.5964 5.000e-01
+ Basis3    東京都    0.000 0.2829 5.000e-01
+ Basis1    大阪府    0.000 0.7620 5.000e-01
+ Basis2    大阪府   10.509 0.8037 2.276e-39
+ Basis3    大阪府    0.000 0.5008 5.000e-01
+ Basis1    福岡県    0.000 0.6350 5.000e-01
+ Basis2    福岡県    0.000 1.0518 5.000e-01
+ Basis3    福岡県    7.065 0.4664 3.893e-52
+dominant component of each destination:
+dom
+ 1  2  3 
+19 20  8 
+Hokkaido=1 Aomori=1 Iwate=1 Miyagi=1 Akita=1 Yamagata=1 Fukushima=1 Ibaraki=1 Tochigi=1 Gunma=1 Saitama=1 Chiba=1 Tokyo=1 Kanagawa=1 Niigata=1 Toyama=2 Ishikawa=2 Fukui=2 Yamanashi=1 Nagano=1 Gifu=2 Shizuoka=1 Aichi=2 Mie=2 Shiga=2 Kyoto=2 Osaka=2 Hyogo=2 Nara=2 Wakayama=2 Tottori=2 Shimane=2 Okayama=2 Hiroshima=2 Yamaguchi=3 Tokushima=2 Kagawa=2 Ehime=2 Kochi=2 Fukuoka=3 Saga=3 Nagasaki=3 Kumamoto=3 Oita=3 Miyazaki=3 Kagoshima=3 Okinawa=1 
+identification: package width 0 | family dimension 1 | local feasible (of 20000 at 1e-4/1e-3/1e-2): 0/0/0 | global feasible non-permutation O: 0 of 100000
+
+==== h3_Q4: 3 hubs (Tokyo, Osaka, Fukuoka), Q = 4, P = 44 ====
+NLL by seed 4138.508 4133.113 4133.113 | degenerate FALSE FALSE FALSE | sigma2 2.6806 tau2 343.50 lambda 0.00780 dfU/(NQ) 0.836
+X: exact zeros 51 of 176 | anchor rows (share > 0.999): comp1: none; comp2: none; comp3: none; comp4: Miyazaki/Kagoshima/Okinawa
+Theta (rows = components, columns = hubs):
+        Tokyo  Osaka Fukuoka
+Basis1 11.685  0.000   0.000
+Basis2  0.000  0.000   0.000
+Basis3  0.000 10.393   0.000
+Basis4  0.000  0.000   8.072
+  Basis Covariate Estimate     SE   p_value
+ Basis1    東京都   11.685 0.9034 1.442e-38
+ Basis2    東京都    0.000 0.8365 5.000e-01
+ Basis3    東京都    0.000 0.6876 5.000e-01
+ Basis4    東京都    0.000 0.2602 5.000e-01
+ Basis1    大阪府    0.000 0.7699 5.000e-01
+ Basis2    大阪府    0.000 0.6049 5.000e-01
+ Basis3    大阪府   10.393 0.8039 1.540e-38
+ Basis4    大阪府    0.000 0.5325 5.000e-01
+ Basis1    福岡県    0.000 0.6541 5.000e-01
+ Basis2    福岡県    0.000 0.7624 5.000e-01
+ Basis3    福岡県    0.000 1.0664 5.000e-01
+ Basis4    福岡県    8.072 0.5414 1.396e-50
+dominant component of each destination:
+dom
+ 1  3  4 
+19 20  8 
+Hokkaido=1 Aomori=1 Iwate=1 Miyagi=1 Akita=1 Yamagata=1 Fukushima=1 Ibaraki=1 Tochigi=1 Gunma=1 Saitama=1 Chiba=1 Tokyo=1 Kanagawa=1 Niigata=1 Toyama=3 Ishikawa=3 Fukui=3 Yamanashi=1 Nagano=1 Gifu=3 Shizuoka=1 Aichi=3 Mie=3 Shiga=3 Kyoto=3 Osaka=3 Hyogo=3 Nara=3 Wakayama=3 Tottori=3 Shimane=3 Okayama=3 Hiroshima=3 Yamaguchi=4 Tokushima=3 Kagawa=3 Ehime=3 Kochi=3 Fukuoka=4 Saga=4 Nagasaki=4 Kumamoto=4 Oita=4 Miyazaki=4 Kagoshima=4 Okinawa=1 
+identification: package width NA (Q >= 4 or not computed) | family dimension 3 | local feasible (of 20000 at 1e-4/1e-3/1e-2): 0/0/0 | global feasible non-permutation O: 0 of 100000
+
+==== h4_Q4: 4 hubs (Tokyo, Aichi, Osaka, Fukuoka), Q = 4, P = 43 ====
+NLL by seed 4044.011 4044.011 4044.011 | degenerate FALSE FALSE FALSE | sigma2 2.7103 tau2 221.43 lambda 0.01224 dfU/(NQ) 0.824
+X: exact zeros 56 of 172 | anchor rows (share > 0.999): comp1: Iwate/Akita/Yamagata; comp2: Fukui; comp3: none; comp4: Miyazaki/Kagoshima
+Theta (rows = components, columns = hubs):
+       Tokyo Aichi Osaka Fukuoka
+Basis1 9.121 0.000 0.000   0.000
+Basis2 0.000 4.863 3.382   0.000
+Basis3 0.000 0.000 3.680   0.000
+Basis4 0.000 0.000 0.000   6.996
+  Basis Covariate Estimate     SE   p_value
+ Basis1    東京都    9.121 0.9192 1.666e-23
+ Basis2    東京都    0.000 0.4988 5.000e-01
+ Basis3    東京都    0.000 0.4539 5.000e-01
+ Basis4    東京都    0.000 0.3260 5.000e-01
+ Basis1    愛知県    0.000 0.8901 5.000e-01
+ Basis2    愛知県    4.863 0.8482 4.942e-09
+ Basis3    愛知県    0.000 0.9901 5.000e-01
+ Basis4    愛知県    0.000 0.6656 5.000e-01
+ Basis1    大阪府    0.000 1.0006 5.000e-01
+ Basis2    大阪府    3.382 0.6677 2.035e-07
+ Basis3    大阪府    3.680 1.0970 3.977e-04
+ Basis4    大阪府    0.000 0.5587 5.000e-01
+ Basis1    福岡県    0.000 0.6340 5.000e-01
+ Basis2    福岡県    0.000 0.4750 5.000e-01
+ Basis3    福岡県    0.000 0.8183 5.000e-01
+ Basis4    福岡県    6.996 0.5643 1.337e-35
+dominant component of each destination:
+dom
+ 1  2  4 
+19 18 10 
+Hokkaido=1 Aomori=1 Iwate=1 Miyagi=1 Akita=1 Yamagata=1 Fukushima=1 Ibaraki=1 Tochigi=1 Gunma=1 Saitama=1 Chiba=1 Tokyo=1 Kanagawa=1 Niigata=1 Toyama=2 Ishikawa=2 Fukui=2 Yamanashi=1 Nagano=1 Gifu=2 Shizuoka=1 Aichi=2 Mie=2 Shiga=2 Kyoto=2 Osaka=2 Hyogo=2 Nara=2 Wakayama=2 Tottori=2 Shimane=2 Okayama=2 Hiroshima=4 Yamaguchi=4 Tokushima=2 Kagawa=2 Ehime=2 Kochi=4 Fukuoka=4 Saga=4 Nagasaki=4 Kumamoto=4 Oita=4 Miyazaki=4 Kagoshima=4 Okinawa=1 
+identification: package width NA (Q >= 4 or not computed) | family dimension 3 | local feasible (of 20000 at 1e-4/1e-3/1e-2): 0/0/0 | global feasible non-permutation O: 0 of 100000
+
+2 x NLL decrease (3 hubs): Q2->Q3 464.0, Q3->Q4 266.4
+
+==== element-wise CV (3 hubs, non-negative variant, default start) ====
+ Q   rmse fold_sd
+ 1 2.5351 0.13725
+ 2 2.1705 0.14655
+ 3 1.9781 0.16828
+ 4 1.8686 0.14487
+row-mean baseline RMSE 2.64580
+
+DONE 2026-11-02 09:00:19

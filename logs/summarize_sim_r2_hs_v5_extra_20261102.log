@@ -1,0 +1,36 @@
+v5: 2800 replicates, 25200 coefficient rows | 2026-11-02 08:31:57
+
+== (1) estimated identification region and (3) variances ==
+      err  eps   n point width_med_nonpoint width_p90_nonpoint coefwidth_med_nonpoint mean_se sigma2_mean tau2_mean sigma2_relbias tau2_relbias
+ gaussian 0.00 500 0.784            0.08169             0.2408                0.01540  0.1145     0.01512    0.2654      -0.009756      0.01061
+ gaussian 0.05 500 0.580            0.14377             0.3812                0.02616  0.1161     0.01511    0.2617      -0.010623     -0.00344
+ gaussian 0.10 500 0.344            0.24371             0.5573                0.04051  0.1188     0.01510    0.2597      -0.011357     -0.01127
+ gaussian 0.20 500 0.070            0.57424             1.2418                0.10161  0.1281     0.01508    0.2583      -0.012593     -0.01634
+   varhet 0.00 200 0.795            0.05834             0.2194                0.01045  0.1119     0.01288    0.2767      -0.156296      0.05341
+   varhet 0.05 200 0.635            0.12233             0.3195                0.01825  0.1128     0.01285    0.2731      -0.158519      0.03997
+   varhet 0.10 200 0.450            0.15986             0.4084                0.02724  0.1143     0.01281    0.2709      -0.160986      0.03136
+   varhet 0.20 200 0.135            0.29550             0.6847                0.04923  0.1194     0.01272    0.2693      -0.166906      0.02545
+
+== (2) conditional SE against the spread of the estimates (9 coefficients; range over coefficients) ==
+      err  eps sd_over_se_min sd_over_se_max mad_over_se_min mad_over_se_max
+ gaussian 0.00           1.04           1.12           0.972            1.13
+ gaussian 0.05           1.04           1.15           0.973            1.16
+ gaussian 0.10           1.05           1.18           1.000            1.17
+ gaussian 0.20           1.11           1.39           1.039            1.36
+   varhet 0.00           1.07           1.15           1.036            1.12
+   varhet 0.05           1.08           1.17           1.023            1.17
+   varhet 0.10           1.09           1.18           1.002            1.20
+   varhet 0.20           1.08           1.21           0.999            1.24
+
+per coefficient, gaussian e = 0:
+      err eps         coef   n mean_se sd_est mad_est sd_over_se mad_over_se
+ gaussian   0   age.rev:B1 500  0.1837 0.1968  0.1913       1.07       1.041
+ gaussian   0   age.rev:B2 500  0.1923 0.2163  0.2098       1.12       1.091
+ gaussian   0   age.rev:B3 500  0.2084 0.2221  0.2194       1.07       1.053
+ gaussian   0 school.GW:B1 500  0.0709 0.0770  0.0800       1.09       1.128
+ gaussian   0 school.GW:B2 500  0.0740 0.0817  0.0823       1.10       1.112
+ gaussian   0 school.GW:B3 500  0.0805 0.0840  0.0821       1.04       1.019
+ gaussian   0     sex.2:B1 500  0.0692 0.0746  0.0673       1.08       0.972
+ gaussian   0     sex.2:B2 500  0.0723 0.0786  0.0769       1.09       1.064
+ gaussian   0     sex.2:B3 500  0.0788 0.0874  0.0851       1.11       1.080
+DONE 2026-11-02 08:31:57

@@ -1,0 +1,126 @@
+== main table (tab_sim_q3.tex) ==
+      err  eps point cov_wald cov_wild cov_prof size0_wald size0_wild size0_prof power_wald power_wild power_prof
+ gaussian 0.00 0.784    0.928    0.925    0.942     0.0670     0.0760     0.0530      0.819      0.822      0.805
+ gaussian 0.05 0.580    0.926    0.923    0.948     0.0740     0.0770     0.0470      0.807      0.810      0.771
+ gaussian 0.10 0.344    0.921    0.918    0.956     0.0800     0.0860     0.0410      0.791      0.792      0.728
+ gaussian 0.20 0.070    0.880    0.876    0.966     0.1380     0.1460     0.0340      0.752      0.753      0.579
+   varhet 0.00 0.795    0.913    0.909    0.927     0.0600     0.0725     0.0600      0.799      0.803      0.789
+   varhet 0.05 0.635    0.904    0.902    0.928     0.0675     0.0775     0.0650      0.790      0.794      0.760
+   varhet 0.10 0.450    0.896    0.895    0.929     0.0750     0.0750     0.0500      0.777      0.784      0.729
+   varhet 0.20 0.135    0.843    0.843    0.911     0.1000     0.0950     0.0475      0.734      0.736      0.631
+
+== fits (tab_app_sim_fits.tex) ==
+      err  eps   n degenerate extra cong_med cong_p05 point coefwidth_med_nonpoint mean_se sigma2_relbias tau2_relbias
+ gaussian 0.00 500          0     0    0.994    0.981 0.784                 0.0154   0.114       -0.00976      0.01061
+ gaussian 0.05 500          0     0    0.993    0.981 0.580                 0.0262   0.116       -0.01062     -0.00344
+ gaussian 0.10 500          0     0    0.992    0.978 0.344                 0.0405   0.119       -0.01136     -0.01127
+ gaussian 0.20 500          1     1    0.987    0.948 0.070                 0.1016   0.128       -0.01259     -0.01634
+   varhet 0.00 200          0     0    0.987    0.978 0.795                 0.0104   0.112       -0.15630      0.05341
+   varhet 0.05 200          0     0    0.985    0.975 0.635                 0.0183   0.113       -0.15852      0.03997
+   varhet 0.10 200          0     0    0.982    0.971 0.450                 0.0272   0.114       -0.16099      0.03136
+   varhet 0.20 200          0     0    0.972    0.957 0.135                 0.0492   0.119       -0.16691      0.02545
+
+== Xi vs ESEM (tab_app_sim_xi.tex) ==
+      err  eps   rmse   cov rmse_esem cov_esem esem_ok heywood
+ gaussian 0.00 0.0305 0.930    0.0313    0.941    1.00   0.066
+ gaussian 0.05 0.0299 0.929    0.0308    0.941    1.00   0.078
+ gaussian 0.10 0.0294 0.928    0.0303    0.940    1.00   0.088
+ gaussian 0.20 0.0285 0.923    0.0297    0.936    0.99   0.120
+   varhet 0.00 0.0319 0.915    0.0315    0.939    1.00   0.000
+   varhet 0.05 0.0314 0.912    0.0310    0.939    1.00   0.000
+   varhet 0.10 0.0309 0.909    0.0306    0.936    1.00   0.005
+   varhet 0.20 0.0302 0.904    0.0301    0.933    1.00   0.045
+
+== known-anchor arm (e = 0, equal variances) ==
+ n_rows cov_wald cov_wild size0_wald size0_wild power_wald power_wild
+   4500     0.93    0.926      0.069      0.073      0.814      0.817
+
+---- tab_sim_q3.tex ----
+\begin{tabular}{llrrrrrrrrrr}
+\toprule
+& & Point & \multicolumn{3}{c}{Coverage} & \multicolumn{3}{c}{Rejection at true zeros} & \multicolumn{3}{c}{Power} \\
+\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
+Errors & $\varepsilon$ & region & Wald & Wild & Profile & Wald & Wild & Profile & Wald & Wild & Profile \\
+\midrule
+Equal & 0.00 & 0.784 & 0.928 & 0.925 & 0.942 & 0.067 & 0.076 & 0.053 & 0.819 & 0.822 & 0.805 \\
+Equal & 0.05 & 0.580 & 0.926 & 0.923 & 0.948 & 0.074 & 0.077 & 0.047 & 0.807 & 0.810 & 0.771 \\
+Equal & 0.10 & 0.344 & 0.921 & 0.918 & 0.956 & 0.080 & 0.086 & 0.041 & 0.791 & 0.792 & 0.728 \\
+Equal & 0.20 & 0.070 & 0.880 & 0.876 & 0.966 & 0.138 & 0.146 & 0.034 & 0.752 & 0.753 & 0.579 \\
+\midrule
+Unequal & 0.00 & 0.795 & 0.913 & 0.909 & 0.927 & 0.060 & 0.072 & 0.060 & 0.799 & 0.803 & 0.789 \\
+Unequal & 0.05 & 0.635 & 0.904 & 0.902 & 0.928 & 0.068 & 0.077 & 0.065 & 0.790 & 0.794 & 0.760 \\
+Unequal & 0.10 & 0.450 & 0.896 & 0.895 & 0.929 & 0.075 & 0.075 & 0.050 & 0.777 & 0.784 & 0.729 \\
+Unequal & 0.20 & 0.135 & 0.843 & 0.843 & 0.911 & 0.100 & 0.095 & 0.048 & 0.734 & 0.736 & 0.631 \\
+\bottomrule
+\end{tabular}
+
+---- tab_app_sim_fits.tex ----
+\begin{tabular}{llrrrrrrrrr}
+\toprule
+& & & & Point & Median & Mean & \multicolumn{2}{c}{Congruence of $\widehat X$} & \multicolumn{2}{c}{Relative bias} \\
+\cmidrule(lr){8-9}\cmidrule(lr){10-11}
+Errors & $\varepsilon$ & $R$ & Degenerate & region & width & SE & median & 5\% & $\widehat\sigma^2$ & $\widehat\tau^2$ \\
+\midrule
+Equal & 0.00 & 500 & 0 & 0.784 & 0.015 & 0.114 & 0.994 & 0.981 & -0.010 & 0.011 \\
+Equal & 0.05 & 500 & 0 & 0.580 & 0.026 & 0.116 & 0.993 & 0.981 & -0.011 & -0.003 \\
+Equal & 0.10 & 500 & 0 & 0.344 & 0.041 & 0.119 & 0.992 & 0.978 & -0.011 & -0.011 \\
+Equal & 0.20 & 500 & 1 & 0.070 & 0.102 & 0.128 & 0.987 & 0.948 & -0.013 & -0.016 \\
+\midrule
+Unequal & 0.00 & 200 & 0 & 0.795 & 0.010 & 0.112 & 0.987 & 0.978 & -- & 0.053 \\
+Unequal & 0.05 & 200 & 0 & 0.635 & 0.018 & 0.113 & 0.985 & 0.975 & -- & 0.040 \\
+Unequal & 0.10 & 200 & 0 & 0.450 & 0.027 & 0.114 & 0.982 & 0.971 & -- & 0.031 \\
+Unequal & 0.20 & 200 & 0 & 0.135 & 0.049 & 0.119 & 0.972 & 0.957 & -- & 0.025 \\
+\bottomrule
+\end{tabular}
+
+---- tab_app_sim_coef.tex ----
+\begin{tabular}{lrrrrrrr}
+\toprule
+& & \multicolumn{3}{c}{$\varepsilon=0$} & \multicolumn{3}{c}{$\varepsilon=0.2$} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}
+Effect & True value & Wald & Wild & Profile & Wald & Wild & Profile \\
+\midrule
+\multicolumn{8}{l}{\emph{Equal error variances}} \\
+\texttt{age.rev} $\to$ 1 & 0.000 & 0.930 & 0.920 & 0.948 & 0.854 & 0.846 & 0.964 \\
+\texttt{age.rev} $\to$ 2 & 0.813 & 0.904 & 0.902 & 0.916 & 0.850 & 0.844 & 0.954 \\
+\texttt{age.rev} $\to$ 3 & -0.727 & 0.930 & 0.936 & 0.940 & 0.922 & 0.922 & 0.958 \\
+\texttt{school.GW} $\to$ 1 & -0.249 & 0.944 & 0.940 & 0.966 & 0.850 & 0.840 & 0.970 \\
+\texttt{school.GW} $\to$ 2 & 0.415 & 0.918 & 0.918 & 0.938 & 0.898 & 0.900 & 0.966 \\
+\texttt{school.GW} $\to$ 3 & -0.101 & 0.938 & 0.936 & 0.952 & 0.876 & 0.868 & 0.980 \\
+\texttt{sex.2} $\to$ 1 & -0.272 & 0.936 & 0.930 & 0.944 & 0.920 & 0.922 & 0.968 \\
+\texttt{sex.2} $\to$ 2 & 0.000 & 0.936 & 0.928 & 0.946 & 0.870 & 0.862 & 0.968 \\
+\texttt{sex.2} $\to$ 3 & 0.169 & 0.918 & 0.918 & 0.930 & 0.882 & 0.876 & 0.966 \\
+\midrule
+\multicolumn{8}{l}{\emph{Unequal error variances}} \\
+\texttt{age.rev} $\to$ 1 & 0.000 & 0.935 & 0.920 & 0.940 & 0.910 & 0.920 & 0.970 \\
+\texttt{age.rev} $\to$ 2 & 0.813 & 0.910 & 0.915 & 0.935 & 0.900 & 0.900 & 0.950 \\
+\texttt{age.rev} $\to$ 3 & -0.727 & 0.930 & 0.925 & 0.935 & 0.915 & 0.915 & 0.950 \\
+\texttt{school.GW} $\to$ 1 & -0.249 & 0.895 & 0.895 & 0.910 & 0.745 & 0.735 & 0.870 \\
+\texttt{school.GW} $\to$ 2 & 0.415 & 0.895 & 0.890 & 0.915 & 0.890 & 0.885 & 0.950 \\
+\texttt{school.GW} $\to$ 3 & -0.101 & 0.875 & 0.880 & 0.920 & 0.745 & 0.745 & 0.865 \\
+\texttt{sex.2} $\to$ 1 & -0.272 & 0.905 & 0.900 & 0.915 & 0.820 & 0.820 & 0.865 \\
+\texttt{sex.2} $\to$ 2 & 0.000 & 0.945 & 0.935 & 0.940 & 0.890 & 0.890 & 0.935 \\
+\texttt{sex.2} $\to$ 3 & 0.169 & 0.930 & 0.925 & 0.935 & 0.770 & 0.775 & 0.845 \\
+\bottomrule
+\end{tabular}
+
+---- tab_app_sim_xi.tex ----
+\begin{tabular}{llrrrrr}
+\toprule
+& & \multicolumn{2}{c}{RMSE of $\widehat\Xi$} & \multicolumn{2}{c}{Coverage of $\Xi$} & ESEM \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+Errors & $\varepsilon$ & NMF-RE & ESEM & NMF-RE & ESEM & Heywood \\
+\midrule
+Equal & 0.00 & 0.030 & 0.031 & 0.930 & 0.941 & 0.066 \\
+Equal & 0.05 & 0.030 & 0.031 & 0.929 & 0.941 & 0.078 \\
+Equal & 0.10 & 0.029 & 0.030 & 0.928 & 0.940 & 0.088 \\
+Equal & 0.20 & 0.028 & 0.030 & 0.923 & 0.936 & 0.120 \\
+\midrule
+Unequal & 0.00 & 0.032 & 0.031 & 0.915 & 0.939 & 0.000 \\
+Unequal & 0.05 & 0.031 & 0.031 & 0.912 & 0.939 & 0.000 \\
+Unequal & 0.10 & 0.031 & 0.031 & 0.909 & 0.936 & 0.005 \\
+Unequal & 0.20 & 0.030 & 0.030 & 0.904 & 0.933 & 0.045 \\
+\bottomrule
+\end{tabular}
+
+saved emit_tables_sim_v5_r2_20261102.rds

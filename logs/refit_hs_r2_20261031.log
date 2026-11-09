@@ -1,0 +1,192 @@
+nmfkc 1.0.2.9000 | R 4.6.1 | P = 9 tests, N = 300 pupils, covariates 3 | 2026-10-31 21:04:13
+same Y as the simulation truth: TRUE
+
+==== free_int ====
+   start seed       nll degenerate       cos       canc         stop outer    time
+ default    1 -1199.338      FALSE 0.5542887   2.039372 outer_lambda    44  32.429
+     spa    1 -1153.084       TRUE 0.8852326 219.516659        maxit    51 236.488
+  nndsvd    1 -1199.338      FALSE 0.5542890   2.039374 outer_lambda    44  36.685
+ default    2 -1199.338      FALSE 0.5542887   2.039372 outer_lambda    44  32.658
+     spa    2 -1153.966       TRUE 0.9228293 212.979201        maxit    51 237.863
+  nndsvd    2 -1199.338      FALSE 0.5542891   2.039373 outer_lambda    44  31.118
+ default    3 -1199.338      FALSE 0.5542862   2.039382 outer_lambda    45  44.528
+     spa    3 -1151.848       TRUE 0.9078693 245.534464        maxit    51 236.634
+  nndsvd    3 -1199.338      FALSE 0.5542890   2.039373 outer_lambda    44  33.370
+ default    4 -1199.338      FALSE 0.5542887   2.039372 outer_lambda    44  32.579
+     spa    4 -1199.234      FALSE 0.5681189   1.977961 outer_lambda    72 203.360
+  nndsvd    4 -1199.338      FALSE 0.5542886   2.039373 outer_lambda    45  40.013
+ default    5 -1199.338      FALSE 0.5542862   2.039382 outer_lambda    45  44.501
+     spa    5 -1148.622       TRUE 0.8745528 265.621451        maxit    51 236.825
+  nndsvd    5 -1199.338      FALSE 0.5542892   2.039373 outer_lambda    44  30.942
+best NLL -1199.3377 | starts within 0.01 of it: 10 of 15 | degenerate FALSE (cos 0.554, canc 2.04)
+sigma2 0.01527 tau2 0.26263 lambda 0.05815 dfU 642.23 saturation dfU/(NQ) 0.714 | converged TRUE
+family: arc -0.0000 deg, family width max 0 | geomin moved Theta by 2.6
+ family: arc -0.0000 deg, family width max 0 | geomin moved Theta by 2.6
+basis-profile X and row shares:
+   Basis1 Basis2 Basis3 Basis1 Basis2 Basis3
+x1  0.103  0.126  0.158  0.266  0.327  0.407
+x2  0.084  0.126  0.172  0.219  0.330  0.451
+x3  0.011  0.015  0.413  0.025  0.034  0.941
+x4  0.244  0.098  0.054  0.615  0.248  0.138
+x5  0.307  0.114  0.038  0.669  0.249  0.083
+x6  0.225  0.045  0.054  0.695  0.138  0.167
+x7  0.000  0.204  0.000  0.000  1.000  0.000
+x8  0.000  0.142  0.029  0.000  0.830  0.170
+x9  0.027  0.129  0.082  0.113  0.542  0.345
+  Basis Covariate Estimate      SE     BSE z_value   p_value
+ Basis1 intercept  0.10996 0.11323 0.11730  0.9711 3.315e-01
+ Basis2 intercept  2.70591 0.12136 0.12121 22.2970 0.000e+00
+ Basis3 intercept  1.21594 0.11417 0.11405 10.6505 0.000e+00
+ Basis1   age.rev  0.81319 0.17692 0.17915  4.5963 4.300e-06
+ Basis2   age.rev -0.72690 0.19081 0.18931 -3.8095 1.392e-04
+ Basis3   age.rev  0.14355 0.18345 0.18469  0.7825 4.339e-01
+ Basis1     sex.2  0.05046 0.07254 0.07483  0.6956 4.867e-01
+ Basis2     sex.2  0.16921 0.07653 0.07806  2.2111 2.703e-02
+ Basis3     sex.2 -0.27188 0.07028 0.07078 -3.8685 1.095e-04
+ Basis1 school.GW  0.41530 0.07251 0.07260  5.7276 1.019e-08
+ Basis2 school.GW -0.10093 0.07829 0.07852 -1.2892 1.973e-01
+ Basis3 school.GW -0.24926 0.06923 0.07018 -3.6002 3.180e-04
+joint Wald by covariate:
+ covariate      W df    p_value
+ intercept 701.07  3 1.230e-151
+   age.rev  27.63  3  4.352e-06
+     sex.2  18.65  3  3.226e-04
+ school.GW  45.91  3  5.923e-10
+
+==== free_noint ====
+   start seed       nll degenerate       cos     canc         stop outer   time
+ default    1 -1022.056      FALSE 0.6990575 2.733936 outer_lambda    31  5.159
+     spa    1 -1022.056      FALSE 0.7013933 2.627095 outer_lambda    31 14.949
+  nndsvd    1 -1022.056      FALSE 0.7077424 2.792663 outer_lambda    34 37.347
+ default    2 -1022.056      FALSE 0.6990575 2.733936 outer_lambda    31  5.126
+     spa    2 -1022.056      FALSE 0.6998031 2.652800 outer_lambda    31 13.397
+  nndsvd    2 -1022.056      FALSE 0.6968885 2.693150 outer_lambda    31 16.870
+ default    3 -1022.056      FALSE 0.6984914 2.671935 outer_lambda    31 14.256
+     spa    3 -1022.056      FALSE 0.7098398 2.833479 outer_lambda    30  5.113
+  nndsvd    3 -1022.056      FALSE 0.7345650 2.824564 outer_lambda    31 21.620
+ default    4 -1022.056      FALSE 0.6990575 2.733936 outer_lambda    31  5.191
+     spa    4 -1022.056      FALSE 0.7263870 2.854758 outer_lambda    31 25.584
+  nndsvd    4 -1022.044      FALSE 0.7372825 2.766226 outer_lambda    17 26.103
+ default    5 -1022.056      FALSE 0.6984914 2.671935 outer_lambda    31 14.232
+     spa    5 -1022.056      FALSE 0.7116057 3.094455 outer_lambda    31  7.377
+  nndsvd    5 -1022.056      FALSE 0.6985500 2.671115 outer_lambda    31 11.046
+best NLL -1022.0557 | starts within 0.01 of it: 14 of 15 | degenerate FALSE (cos 0.697, canc 2.69)
+sigma2 0.01521 tau2 0.75087 lambda 0.02025 dfU 703.23 saturation dfU/(NQ) 0.781 | converged TRUE
+family: arc -35.8050 deg, family width max 0.669 | geomin moved Theta by 0.959
+ family: arc 29.2000 deg, family width max 0.669 | geomin moved Theta by 0.959
+basis-profile X and row shares:
+   Basis1 Basis2 Basis3 Basis1 Basis2 Basis3
+x1  0.130  0.117  0.151  0.328  0.294  0.379
+x2  0.133  0.107  0.163  0.331  0.265  0.405
+x3  0.131  0.008  0.280  0.313  0.019  0.669
+x4  0.162  0.111  0.036  0.525  0.358  0.118
+x5  0.195  0.130  0.020  0.565  0.377  0.058
+x6  0.141  0.062  0.011  0.657  0.289  0.054
+x7  0.022  0.205  0.115  0.063  0.601  0.336
+x8  0.028  0.136  0.101  0.106  0.512  0.381
+x9  0.057  0.125  0.122  0.188  0.410  0.402
+  Basis Covariate Estimate     SE    BSE z_value   p_value
+ Basis1   age.rev  2.28642 0.1699 0.1681 13.4580 0.000e+00
+ Basis2   age.rev  1.79418 0.1494 0.1476 12.0072 0.000e+00
+ Basis3   age.rev  1.78198 0.1663 0.1644 10.7182 0.000e+00
+ Basis1     sex.2 -0.03786 0.1159 0.1173 -0.3268 7.439e-01
+ Basis2     sex.2  0.58392 0.1098 0.1092  5.3184 1.047e-07
+ Basis3     sex.2 -0.17183 0.1117 0.1144 -1.5378 1.241e-01
+ Basis1 school.GW  0.54613 0.1184 0.1192  4.6141 3.947e-06
+ Basis2 school.GW  0.20944 0.1193 0.1188  1.7549 7.927e-02
+ Basis3 school.GW -0.54128 0.1108 0.1092 -4.8834 1.042e-06
+joint Wald by covariate:
+ covariate      W df    p_value
+   age.rev 710.00  3 1.427e-153
+     sex.2  28.74  3  2.536e-06
+ school.GW  45.88  3  6.016e-10
+
+==== nonneg_int ====
+   start seed       nll degenerate        cos canc         stop outer  time
+ default    1 -1033.585      FALSE 0.01798729    1 outer_lambda   406 2.495
+     spa    1 -1030.823      FALSE 0.06300862    1 outer_lambda    13 3.448
+  nndsvd    1 -1030.823      FALSE 0.06300864    1 outer_lambda    13 3.531
+ default    2 -1033.585      FALSE 0.01798729    1 outer_lambda   406 2.454
+     spa    2 -1030.823      FALSE 0.06300850    1 outer_lambda    13 3.479
+  nndsvd    2 -1030.822      FALSE 0.06300811    1 outer_lambda    13 3.610
+ default    3 -1033.585      FALSE 0.01798761    1 outer_lambda   384 2.466
+     spa    3 -1030.823      FALSE 0.06300843    1 outer_lambda    13 3.538
+  nndsvd    3 -1030.823      FALSE 0.06300825    1 outer_lambda    13 3.601
+ default    4 -1033.585      FALSE 0.01798729    1 outer_lambda   406 2.482
+     spa    4 -1030.823      FALSE 0.06300880    1 outer_lambda    13 3.458
+  nndsvd    4 -1030.823      FALSE 0.06300881    1 outer_lambda    13 3.510
+ default    5 -1033.585      FALSE 0.01798761    1 outer_lambda   384 2.449
+     spa    5 -1030.823      FALSE 0.06300851    1 outer_lambda    13 3.517
+  nndsvd    5 -1030.822      FALSE 0.06300802    1 outer_lambda    13 3.657
+best NLL -1033.5854 | starts within 0.01 of it: 5 of 15 | degenerate FALSE (cos 0.018, canc 1.00)
+sigma2 0.01697 tau2 0.12317 lambda 0.13777 dfU 655.52 saturation dfU/(NQ) 0.728 | converged TRUE
+basis-profile X and row shares:
+   Basis1 Basis2 Basis3 Basis1 Basis2 Basis3
+x1      0  0.231  0.000      0  1.000  0.000
+x2      0  0.232  0.000      0  1.000  0.000
+x3      1  0.000  0.000      1  0.000  0.000
+x4      0  0.014  0.331      0  0.041  0.959
+x5      0  0.000  0.411      0  0.000  1.000
+x6      0  0.000  0.258      0  0.000  1.000
+x7      0  0.200  0.000      0  1.000  0.000
+x8      0  0.152  0.000      0  1.000  0.000
+x9      0  0.172  0.000      0  1.000  0.000
+  Basis Covariate  Estimate      SE     BSE   z_value    p_value
+ Basis1 intercept 4.698e-01 0.04084 0.04124 1.150e+01  6.380e-31
+ Basis2 intercept 2.355e+00 0.08583 0.08531 2.744e+01 4.633e-166
+ Basis3 intercept 9.369e-01 0.08408 0.08839 1.114e+01  3.902e-29
+ Basis1   age.rev 1.409e-07 0.06552 0.03881 2.150e-06  5.000e-01
+ Basis2   age.rev 1.000e-10 0.13013 0.07833 7.685e-10  5.000e-01
+ Basis3   age.rev 4.499e-01 0.12796 0.13202 3.516e+00  2.193e-04
+ Basis1     sex.2 1.000e-10 0.02547 0.01480 3.927e-09  5.000e-01
+ Basis2     sex.2 1.000e-10 0.05583 0.03425 1.791e-09  5.000e-01
+ Basis3     sex.2 5.517e-02 0.05342 0.04738 1.033e+00  1.508e-01
+ Basis1 school.GW 1.000e-10 0.02527 0.01435 3.957e-09  5.000e-01
+ Basis2 school.GW 1.000e-10 0.05658 0.03292 1.767e-09  5.000e-01
+ Basis3 school.GW 2.390e-01 0.05320 0.05251 4.492e+00  3.525e-06
+joint Wald by covariate:
+ covariate       W df    p_value
+ intercept 765.169  3 1.549e-165
+   age.rev  14.333  3  2.485e-03
+     sex.2   1.239  3  7.438e-01
+ school.GW  23.617  3  3.003e-05
+
+LR intercept (sign-free): 2*dNLL = 354.56 on 3 df | sign-free vs non-negative (intercept): 2*dNLL = 331.50
+best fit equals the simulation truth: max|X - X*| 5.4e-08, max|Theta - Theta*| 3.2e-07 (after alignment)
+stage 1 saved 2026-10-31 21:08:13
+
+==== free_int, marginal bootstrap: 480 of 480 refits ok, flagged degenerate 0.067, restarted 0.021 ====
+  Basis Covariate Estimate      SE boot_sd boot_mad      low      high covers_est mad_over_se
+ Basis1 intercept  0.10996 0.11323  3.1857  0.79976 -3.83648  1.509103       TRUE       7.063
+ Basis2 intercept  2.70591 0.12136  6.0281  0.73119  1.42649  7.082414       TRUE       6.025
+ Basis3 intercept  1.21594 0.11417  3.7170  0.45123 -2.15077  2.815198       TRUE       3.952
+ Basis1   age.rev  0.81319 0.17692  0.7400  0.27522  0.21363  1.923352       TRUE       1.556
+ Basis2   age.rev -0.72690 0.19081  1.2954  0.24390 -1.83621 -0.199370       TRUE       1.278
+ Basis3   age.rev  0.14355 0.18345  0.8030  0.25483 -0.50621  0.974888       TRUE       1.389
+ Basis1     sex.2  0.05046 0.07254  0.1626  0.09934 -0.19413  0.315596       TRUE       1.369
+ Basis2     sex.2  0.16921 0.07653  0.2909  0.09265 -0.09181  0.508752       TRUE       1.211
+ Basis3     sex.2 -0.27188 0.07028  0.2074  0.09117 -0.47698 -0.077080       TRUE       1.297
+ Basis1 school.GW  0.41530 0.07251  0.1870  0.09350  0.23163  0.762383       TRUE       1.290
+ Basis2 school.GW -0.10093 0.07829  0.2922  0.10519 -0.49816  0.140331       TRUE       1.344
+ Basis3 school.GW -0.24926 0.06923  0.1880  0.09490 -0.53200 -0.009534       TRUE       1.371
+covariates only: median MAD/SE 1.34 (range 1.21-1.56) | intercepts: 7.06 6.03 3.95
+Xi: bootstrap interval covers the estimate for 36 of 36 entries
+
+==== free_int, parametric bootstrap: 480 of 480 refits ok, flagged degenerate 0.000, restarted 0.000 ====
+  Basis Covariate Estimate      SE boot_sd boot_mad       low     high covers_est mad_over_se
+ Basis1 intercept  0.10996 0.11323 0.24433  0.23558 -0.410566  0.57565       TRUE       2.081
+ Basis2 intercept  2.70591 0.12136 0.23319  0.22272  2.326978  3.26671       TRUE       1.835
+ Basis3 intercept  1.21594 0.11417 0.20314  0.19269  0.758589  1.53855       TRUE       1.688
+ Basis1   age.rev  0.81319 0.17692 0.22903  0.22515  0.426088  1.29176       TRUE       1.273
+ Basis2   age.rev -0.72690 0.19081 0.22493  0.22900 -1.183387 -0.34871       TRUE       1.200
+ Basis3   age.rev  0.14355 0.18345 0.19527  0.19956 -0.223213  0.50451       TRUE       1.088
+ Basis1     sex.2  0.05046 0.07254 0.08206  0.08150 -0.100247  0.21505       TRUE       1.123
+ Basis2     sex.2  0.16921 0.07653 0.08391  0.08630  0.008988  0.32374       TRUE       1.128
+ Basis3     sex.2 -0.27188 0.07028 0.07247  0.07385 -0.411853 -0.12786       TRUE       1.051
+ Basis1 school.GW  0.41530 0.07251 0.07976  0.08323  0.278834  0.57188       TRUE       1.148
+ Basis2 school.GW -0.10093 0.07829 0.08130  0.08494 -0.246377  0.07213       TRUE       1.085
+ Basis3 school.GW -0.24926 0.06923 0.07206  0.07109 -0.405602 -0.12779       TRUE       1.027
+covariates only: median MAD/SE 1.12 (range 1.03-1.27) | intercepts: 2.08 1.84 1.69
+Xi: bootstrap interval covers the estimate for 36 of 36 entries
+
+DONE 2026-10-31 21:22:53

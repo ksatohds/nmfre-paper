@@ -1,0 +1,11 @@
+v5 population identification region of the nine covariate effects | 2026-11-02 12:50:11 
+      err  eps max_width   coef_max n_positive
+ gaussian 0.00   0.00000 age.rev:B1          0
+   varhet 0.00   0.00000 age.rev:B1          0
+ gaussian 0.05   0.08439 age.rev:B1          9
+   varhet 0.05   0.08439 age.rev:B1          9
+ gaussian 0.10   0.18692 age.rev:B1          9
+   varhet 0.10   0.18692 age.rev:B1          9
+ gaussian 0.20   0.47470 age.rev:B1          9
+   varhet 0.20   0.47470 age.rev:B1          9
+DONE

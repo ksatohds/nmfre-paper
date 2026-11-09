@@ -1,0 +1,57 @@
+replicates read 2800, ok 2800 | 2026-11-02 11:41:27
+
+== by design: coverage of the canonical Theta, size at the true zeros, power, coverage of the whole population region, mean length ==
+      err  eps    n cov_wald cov_wild cov_prof size0_wald size0_wild size0_prof power_wald power_wild power_prof set_wald set_wild set_prof len_wald len_wild len_prof
+ gaussian 0.00 4500    0.928    0.925    0.942     0.0670     0.0760     0.0530      0.819      0.822      0.805    0.928    0.925    0.942    0.449    0.447    0.481
+ gaussian 0.05 4500    0.926    0.923    0.948     0.0740     0.0770     0.0470      0.807      0.810      0.771    0.904    0.900    0.934    0.455    0.454    0.510
+ gaussian 0.10 4500    0.921    0.918    0.956     0.0800     0.0860     0.0410      0.791      0.792      0.728    0.860    0.856    0.922    0.466    0.464    0.555
+ gaussian 0.20 4500    0.880    0.876    0.966     0.1380     0.1460     0.0340      0.752      0.753      0.579    0.669    0.666    0.906    0.502    0.500    0.716
+   varhet 0.00 1800    0.913    0.909    0.927     0.0600     0.0725     0.0600      0.799      0.803      0.789    0.913    0.909    0.927    0.439    0.437    0.464
+   varhet 0.05 1800    0.904    0.902    0.928     0.0675     0.0775     0.0650      0.790      0.794      0.760    0.877    0.879    0.902    0.442    0.441    0.481
+   varhet 0.10 1800    0.896    0.895    0.929     0.0750     0.0750     0.0500      0.777      0.784      0.729    0.828    0.826    0.876    0.448    0.447    0.507
+   varhet 0.20 1800    0.843    0.843    0.911     0.1000     0.0950     0.0475      0.734      0.736      0.631    0.639    0.634    0.803    0.468    0.466    0.581
+
+== by coefficient, e = 0 and e = 0.2 ==
+      err eps         coef target cov_wald cov_wild cov_prof
+ gaussian 0.0   age.rev:B1  0.000    0.930    0.920    0.948
+ gaussian 0.0   age.rev:B2  0.813    0.904    0.902    0.916
+ gaussian 0.0   age.rev:B3 -0.727    0.930    0.936    0.940
+ gaussian 0.0 school.GW:B1 -0.249    0.944    0.940    0.966
+ gaussian 0.0 school.GW:B2  0.415    0.918    0.918    0.938
+ gaussian 0.0 school.GW:B3 -0.101    0.938    0.936    0.952
+ gaussian 0.0     sex.2:B1 -0.272    0.936    0.930    0.944
+ gaussian 0.0     sex.2:B2  0.000    0.936    0.928    0.946
+ gaussian 0.0     sex.2:B3  0.169    0.918    0.918    0.930
+ gaussian 0.2   age.rev:B1  0.000    0.854    0.846    0.964
+ gaussian 0.2   age.rev:B2  0.813    0.850    0.844    0.954
+ gaussian 0.2   age.rev:B3 -0.727    0.922    0.922    0.958
+ gaussian 0.2 school.GW:B1 -0.249    0.850    0.840    0.970
+ gaussian 0.2 school.GW:B2  0.415    0.898    0.900    0.966
+ gaussian 0.2 school.GW:B3 -0.101    0.876    0.868    0.980
+ gaussian 0.2     sex.2:B1 -0.272    0.920    0.922    0.968
+ gaussian 0.2     sex.2:B2  0.000    0.870    0.862    0.968
+ gaussian 0.2     sex.2:B3  0.169    0.882    0.876    0.966
+   varhet 0.0   age.rev:B1  0.000    0.935    0.920    0.940
+   varhet 0.0   age.rev:B2  0.813    0.910    0.915    0.935
+   varhet 0.0   age.rev:B3 -0.727    0.930    0.925    0.935
+   varhet 0.0 school.GW:B1 -0.249    0.895    0.895    0.910
+   varhet 0.0 school.GW:B2  0.415    0.895    0.890    0.915
+   varhet 0.0 school.GW:B3 -0.101    0.875    0.880    0.920
+   varhet 0.0     sex.2:B1 -0.272    0.905    0.900    0.915
+   varhet 0.0     sex.2:B2  0.000    0.945    0.935    0.940
+   varhet 0.0     sex.2:B3  0.169    0.930    0.925    0.935
+   varhet 0.2   age.rev:B1  0.000    0.910    0.920    0.970
+   varhet 0.2   age.rev:B2  0.813    0.900    0.900    0.950
+   varhet 0.2   age.rev:B3 -0.727    0.915    0.915    0.950
+   varhet 0.2 school.GW:B1 -0.249    0.745    0.735    0.870
+   varhet 0.2 school.GW:B2  0.415    0.890    0.885    0.950
+   varhet 0.2 school.GW:B3 -0.101    0.745    0.745    0.865
+   varhet 0.2     sex.2:B1 -0.272    0.820    0.820    0.865
+   varhet 0.2     sex.2:B2  0.000    0.890    0.890    0.935
+   varhet 0.2     sex.2:B3  0.169    0.770    0.775    0.845
+
+range over coefficients of |cov_wald - cov_wild|: 0.000 0.015 
+
+== known-anchor arm (n = 4500 rows): coverage Wald 0.930 wild 0.926 | size at zeros Wald 0.069 wild 0.073 | power Wald 0.814 wild 0.817 ==
+
+saved summarize_sim_r2_hs_v5_wald_20261102.rds
